@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Prompt Engine - AI Prompt Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div>
+            <h1>⚡ PROMPT ENGINE</h1>
+            <p>Advanced AI Prompt Generator</p>
+            <p class="subtitle">Generate optimized prompts for multiple LLMs across diverse use cases</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="
+              background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(255, 0, 110, 0.2));
+              border: 1px solid rgba(0, 217, 255, 0.3);
+              padding: 1rem;
+              border-radius: 10px;
+              font-size: 0.85rem;
+              color: var(--text-light);
+              margin-bottom: 1rem;
+            ">
+              <div style="color: var(--primary); font-weight: bold; margin-bottom: 0.3rem;">🤖 Created with</div>
+              <div>GitHub Copilot</div>
+              <div style="color: var(--secondary); font-weight: bold;">Claude 3 Sonnet</div>
+            </div>
+            <button class="btn" id="copilotCliBtn" style="font-size: 0.85rem; padding: 0.75rem 1rem;">
+              🔗 Link Copilot Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main workspace -->
+      <div class="workspace">
+        <!-- Left panel: Configuration -->
+        <div>
+          <!-- Model Selection -->
+          <div class="card">
+            <div class="card-title">🤖 Language Model</div>
+            <div class="form-group">
+              <p class="form-text">Select your target AI model</p>
+              <div class="option-group" id="modelGroup">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Programming Language -->
+          <div class="card">
+            <div class="card-title">💻 Programming Language</div>
+            <div class="form-group">
+              <p class="form-text">Choose your primary language</p>
+              <div class="option-group" id="languageGroup">
+                <select id="languageSelect" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.3); color: white; font-size: 0.95rem; cursor: pointer;">
+                 <optgroup label="🔤 Programming Languages">
+                   <option value="JavaScript" selected>JavaScript</option>
+                   <option value="Python">Python</option>
+                   <option value="TypeScript">TypeScript</option>
+                   <option value="Go">Go</option>
+                   <option value="Rust">Rust</option>
+                   <option value="Java">Java</option>
+                   <option value="C++">C++</option>
+                   <option value="C#">C#</option>
+                   <option value="PHP">PHP</option>
+                   <option value="Ruby">Ruby</option>
+                   <option value="Kotlin">Kotlin</option>
+                   <option value="Swift">Swift</option>
+                 </optgroup>
+                 <optgroup label="🗄️ Database Languages">
+                   <option value="MySQL">MySQL</option>
+                   <option value="PostgreSQL">PostgreSQL</option>
+                   <option value="SQL">SQL (Generic)</option>
+                   <option value="MongoDB">MongoDB (NoSQL)</option>
+                   <option value="Redis">Redis</option>
+                   <option value="Cassandra">Cassandra</option>
+                   <option value="ElasticSearch">ElasticSearch</option>
+                   <option value="SQLite">SQLite</option>
+                 </optgroup>
+                 <optgroup label="☎️ Telephony & VoIP">
+                   <option value="Asterisk">Asterisk (AsteriskSCF)</option>
+                   <option value="Dialplan">Dialplan (Asterisk)</option>
+                   <option value="FreeSWITCH">FreeSWITCH XML</option>
+                   <option value="SIP">SIP Configuration</option>
+                   <option value="VoiceXML">VoiceXML</option>
+                   <option value="SCCP">SCCP Configuration</option>
+                 </optgroup>
+                 <optgroup label="⚙️ Configuration & DevOps">
+                   <option value="YAML">YAML</option>
+                   <option value="JSON">JSON</option>
+                   <option value="XML">XML</option>
+                   <option value="Terraform">Terraform</option>
+                   <option value="Ansible">Ansible</option>
+                   <option value="Shell">Shell Script</option>
+                   <option value="Docker">Dockerfile</option>
+                   <option value="Kubernetes">Kubernetes</option>
+                 </optgroup>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Skill Level -->
+          <div class="card">
+            <div class="card-title">🎯 Skill Level</div>
+            <div class="form-group">
+              <p class="form-text">Adjust complexity of generated prompts</p>
+              <div class="option-group" id="levelGroup">
+                <button class="option-btn" data-level="beginner">Beginner</button>
+                <button class="option-btn selected" data-level="intermediate">Intermediate</button>
+                <button class="option-btn" data-level="advanced">Advanced</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prompt Type -->
+          <div class="card">
+            <div class="card-title">📝 Prompt Type</div>
+            <div class="form-group">
+              <p class="form-text">What would you like to generate?</p>
+              <div class="option-group" id="typeGroup">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel: Input & Purpose -->
+        <div>
+          <!-- Purpose Selection -->
+          <div class="card">
+            <div class="card-title">🎪 Project Purpose</div>
+            <div class="form-group">
+              <p class="form-text">What are you building?</p>
+              <div class="purpose-grid" id="purposeGroup">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Task Input -->
+          <div class="card">
+            <div class="card-title">✍️ Your Task</div>
+            <div class="form-group">
+              <label for="taskInput">Describe what you want to build or fix:</label>
+              <textarea id="taskInput" placeholder="e.g., Create a real-time chat application with WebSocket support, user authentication, and message persistence using MongoDB..."></textarea>
+              <div class="form-text">Be specific and detailed for better results</div>
+            </div>
+          </div>
+
+          <!-- Constraints -->
+          <div class="card">
+            <div class="card-title">⚙️ Constraints (Optional)</div>
+            <div class="form-group">
+              <label for="constraintsInput">Add comma-separated constraints:</label>
+              <textarea id="constraintsInput" placeholder="e.g., Must be responsive, Use TypeScript, Include error handling, Support dark mode"></textarea>
+              <div class="form-text">These will be included in the generated prompt</div>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <div class="card">
+            <button class="btn" id="generateBtn" style="width: 100%; padding: 1rem;">
+              🚀 GENERATE PROMPT
+            </button>
+            <button class="btn secondary" id="copyBtn" style="width: 100%; padding: 1rem; margin-top: 0.5rem; display: none;">
+              📋 COPY TO CLIPBOARD
+            </button>
+            <button class="btn secondary" id="clearBtn" style="width: 100%; padding: 1rem; margin-top: 0.5rem;">
+              🔄 CLEAR ALL
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Section -->
+      <div class="card full">
+        <div class="card-title">📤 Generated Prompt</div>
+        <div id="statusMessage"></div>
+        <div id="outputContent" class="output-empty">
+          Your generated prompt will appear here...
+        </div>
+      </div>
+
+      <!-- Tabs Section -->
+      <div class="card full">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="history">📚 History</button>
+          <button class="tab-btn" data-tab="stats">📊 Statistics</button>
+          <button class="tab-btn" data-tab="guide">📖 Guide</button>
+          <button class="tab-btn" data-tab="telephony">☎️ Telephony</button>
+          <button class="tab-btn" data-tab="dialplans">📞 Dial Plans</button>
+          <button class="tab-btn" data-tab="aiconfig">🤖 AI Config</button>
+          <button class="tab-btn" data-tab="extensions">🧩 Extensions</button>
+          <button class="tab-btn" data-tab="personalai">🎓 Personal AI</button>
+          <button class="tab-btn" data-tab="copilot">🚀 Copilot CLI</button>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-content active">
+          <div class="form-group">
+            <label>Recent Generated Prompts</label>
+            <div class="history-list" id="historyList">
+              <div class="output-empty">No history yet</div>
+            </div>
+            <button class="btn secondary" id="clearHistoryBtn" style="margin-top: 1rem; width: 100%;">
+              Clear History
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="stats" class="tab-content">
+          <div class="form-group">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+              <div style="background: rgba(0, 217, 255, 0.1); border: 1px solid rgba(0, 217, 255, 0.3); padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 2rem; color: #00d9ff; font-weight: bold;" id="totalStat">0</div>
+                <div style="color: var(--text-dim); font-size: 0.9rem;">Total Prompts</div>
+              </div>
+              <div id="typeStats"></div>
+              <div id="langStats"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Guide Tab -->
+        <div id="guide" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">🚀 How to Use Prompt Engine</h3>
+            
+            <div style="background: rgba(0, 217, 255, 0.05); border-left: 3px solid var(--primary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <h4 style="color: var(--primary); margin-bottom: 0.5rem;">1. Select Your Model</h4>
+              <p>Choose the AI language model you'll be using (Claude, GPT-4, etc.). This optimizes the prompt for that specific model's strengths.</p>
+            </div>
+
+            <div style="background: rgba(0, 153, 204, 0.05); border-left: 3px solid var(--secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <h4 style="color: var(--secondary); margin-bottom: 0.5rem;">2. Pick Your Language & Level</h4>
+              <p>Select your programming language and skill level. This ensures the generated code matches your expertise and requirements.</p>
+            </div>
+
+            <div style="background: rgba(255, 0, 110, 0.05); border-left: 3px solid var(--accent); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <h4 style="color: var(--accent); margin-bottom: 0.5rem;">3. Define Your Purpose</h4>
+              <p>Specify what you're building - mobile app, API, CLI tool, etc. This shapes the entire approach and architecture suggestions.</p>
+            </div>
+
+            <div style="background: rgba(0, 217, 255, 0.05); border-left: 3px solid var(--primary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <h4 style="color: var(--primary); margin-bottom: 0.5rem;">4. Choose Prompt Type</h4>
+              <p><strong>Coding:</strong> Generate new code | <strong>Debugging:</strong> Fix issues | <strong>Refactor:</strong> Improve quality | <strong>Testing:</strong> Write tests | <strong>Documentation:</strong> Create docs | <strong>Architecture:</strong> Design systems | <strong>Code Review:</strong> Analyze code | <strong>Optimization:</strong> Boost performance</p>
+            </div>
+
+            <div style="background: rgba(0, 153, 204, 0.05); border-left: 3px solid var(--secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <h4 style="color: var(--secondary); margin-bottom: 0.5rem;">5. Write Your Task</h4>
+              <p>Be specific! The more detail you provide, the better the generated prompt. Include requirements, edge cases, and preferences.</p>
+            </div>
+
+            <div style="background: rgba(255, 0, 110, 0.05); border-left: 3px solid var(--accent); padding: 1rem; border-radius: 8px;">
+              <h4 style="color: var(--accent); margin-bottom: 0.5rem;">6. Add Constraints (Optional)</h4>
+              <p>Specify any additional requirements like "must use TypeScript", "include error handling", "responsive design", etc.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telephony Tab -->
+        <div id="telephony" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">☎️ Telephony Platform Configuration</h3>
+            
+            <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+              <h4 style="color: var(--primary); margin-bottom: 1rem;">Available Carriers</h4>
+              <div id="carriersList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="text-align: center; color: var(--text-dim);">Loading carriers...</div>
+              </div>
+            </div>
+
+            <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">Selected Carrier Configuration</h4>
+              <div id="carrierConfig" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--text-light); white-space: pre-wrap; max-height: 300px; overflow-y: auto;">
+                Select a carrier to view configuration...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dial Plans Tab -->
+        <div id="dialplans" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">📞 Dial Plans & Call Routing</h3>
+            
+            <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+              <h4 style="color: var(--primary); margin-bottom: 1rem;">Available Dial Plans</h4>
+              <div id="dialplansList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                <div style="text-align: center; color: var(--text-dim);">Loading dial plans...</div>
+              </div>
+            </div>
+
+            <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">Dial Plan Details</h4>
+              <div id="dialplanDetail" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--text-light); white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+                Select a dial plan to view details...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Configuration Tab -->
+        <div id="aiconfig" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">🤖 AI Configuration & Capabilities</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+              <!-- Speech Recognition -->
+              <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+                <h4 style="color: var(--primary); margin-bottom: 1rem;">🎙️ Speech Recognition</h4>
+                <div id="sttOptions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <div style="text-align: center; color: var(--text-dim);">Loading...</div>
+                </div>
+              </div>
+
+              <!-- Text-to-Speech -->
+              <div style="background: rgba(0, 153, 204, 0.05); border: 1px solid rgba(0, 153, 204, 0.2); padding: 1.5rem; border-radius: 10px;">
+                <h4 style="color: var(--secondary); margin-bottom: 1rem;">🔊 Text-to-Speech</h4>
+                <div id="ttsOptions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <div style="text-align: center; color: var(--text-dim);">Loading...</div>
+                </div>
+              </div>
+
+              <!-- NLP & Intent Recognition -->
+              <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px;">
+                <h4 style="color: var(--accent); margin-bottom: 1rem;">🧠 NLP & Intent Recognition</h4>
+                <div id="nlpOptions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <div style="text-align: center; color: var(--text-dim);">Loading...</div>
+                </div>
+              </div>
+
+              <!-- Voice Analysis -->
+              <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+                <h4 style="color: var(--primary); margin-bottom: 1rem;">🎯 Voice Analysis</h4>
+                <div id="voiceFeatures" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <div style="text-align: center; color: var(--text-dim);">Loading...</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Voice Settings -->
+            <div style="background: rgba(0, 153, 204, 0.05); border: 1px solid rgba(0, 153, 204, 0.2); padding: 1.5rem; border-radius: 10px;">
+              <h4 style="color: var(--secondary); margin-bottom: 1rem;">🎵 Voice Settings</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div>
+                  <label style="color: var(--primary);">Accent</label>
+                  <select style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light); margin-top: 0.3rem;">
+                    <option>British</option>
+                    <option>American</option>
+                    <option>Australian</option>
+                    <option>Indian</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="color: var(--primary);">Gender</label>
+                  <select style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light); margin-top: 0.3rem;">
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Neutral</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="color: var(--primary);">Emotion</label>
+                  <select style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light); margin-top: 0.3rem;">
+                    <option>Professional</option>
+                    <option>Friendly</option>
+                    <option>Concerned</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Browser Extensions Tab -->
+        <div id="extensions" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">🧩 Browser Extensions</h3>
+            <div id="extensionsList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+              <div style="text-align: center; color: var(--text-dim);">Loading extensions...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal AI Guide Tab -->
+        <div id="personalai" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">🎓 Create Your Personal AI with Copilot</h3>
+            
+            <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(255, 0, 110, 0.1)); border: 1px solid rgba(0, 217, 255, 0.2); padding: 2rem; border-radius: 10px;">
+              <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.1rem;">5-Step Journey to Personal AI</h4>
+              
+              <div style="display: grid; gap: 1rem;">
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
+                  <h5 style="color: var(--primary); margin-bottom: 0.3rem;">Step 1️⃣ Install GitHub Copilot</h5>
+                  <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">Get subscription and install in your IDE (VS Code, JetBrains)</p>
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--secondary);">
+                  <h5 style="color: var(--secondary); margin-bottom: 0.3rem;">Step 2️⃣ Configure Preferences</h5>
+                  <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">Set coding style, languages, frameworks, and shortcuts in config file</p>
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent);">
+                  <h5 style="color: var(--accent); margin-bottom: 0.3rem;">Step 3️⃣ Build AI Engine</h5>
+                  <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">Create core engine with memory system, context manager, and prompt builder</p>
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
+                  <h5 style="color: var(--primary); margin-bottom: 0.3rem;">Step 4️⃣ Create Extensions</h5>
+                  <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">Build VS Code extension, Slack bot, or web integration</p>
+                </div>
+
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--secondary);">
+                  <h5 style="color: var(--secondary); margin-bottom: 0.3rem;">Step 5️⃣ Deploy & Train</h5>
+                  <p style="color: var(--text-light); font-size: 0.9rem; margin: 0;">Deploy to cloud, train on your patterns, iterate based on feedback</p>
+                </div>
+              </div>
+
+              <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.3); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+                <strong style="color: var(--primary);">📖 Full Guide Available</strong>
+                <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0.5rem;">See PERSONAL_AI_GUIDE.md for detailed code examples, templates, and advanced features.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GitHub Copilot CLI Tab -->
+        <div id="copilot" class="tab-content">
+          <div class="form-group">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">🚀 GitHub Copilot CLI Integration</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+              <!-- CLI Status -->
+              <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+                <h4 style="color: var(--primary); margin-bottom: 1rem;">📋 CLI Status</h4>
+                <div id="cliStatus" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--text-light);">
+                  Checking CLI status...
+                </div>
+                <button class="btn" id="checkCliBtn" style="margin-top: 1rem; width: 100%;">
+                  🔄 Check Status
+                </button>
+              </div>
+
+              <!-- Link Account -->
+              <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px;">
+                <h4 style="color: var(--accent); margin-bottom: 1rem;">🔗 Link Account</h4>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">Connect your GitHub account to use Copilot CLI features.</p>
+                <button class="btn" id="linkAccountBtn" style="width: 100%; background: rgba(255, 0, 110, 0.3); border: 1px solid rgba(255, 0, 110, 0.5); color: var(--accent);">
+                  🔐 Link GitHub Account
+                </button>
+              </div>
+            </div>
+
+            <!-- Installation Platforms -->
+            <div style="background: rgba(0, 153, 204, 0.05); border: 1px solid rgba(0, 153, 204, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+              <h4 style="color: var(--secondary); margin-bottom: 1rem;">⚙️ Generate Install Packages</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <button class="btn platform-btn" data-platform="nodejs" style="font-size: 0.85rem; background: rgba(139, 200, 60, 0.2); border: 1px solid rgba(139, 200, 60, 0.5); color: #8bc83c;">
+                  📦 Node.js
+                </button>
+                <button class="btn platform-btn" data-platform="python" style="font-size: 0.85rem; background: rgba(0, 153, 204, 0.2); border: 1px solid rgba(0, 153, 204, 0.5); color: var(--secondary);">
+                  🐍 Python
+                </button>
+                <button class="btn platform-btn" data-platform="lamp" style="font-size: 0.85rem; background: rgba(255, 102, 0, 0.2); border: 1px solid rgba(255, 102, 0, 0.5); color: #ff6600;">
+                  🌐 LAMP
+                </button>
+                <button class="btn platform-btn" data-platform="docker" style="font-size: 0.85rem; background: rgba(0, 150, 200, 0.2); border: 1px solid rgba(0, 150, 200, 0.5); color: #0096c8;">
+                  🐳 Docker
+                </button>
+                <button class="btn platform-btn" data-platform="full-stack" style="font-size: 0.85rem; background: rgba(0, 217, 255, 0.2); border: 1px solid rgba(0, 217, 255, 0.5); color: var(--primary);">
+                  🔧 Full-Stack
+                </button>
+              </div>
+              <div id="scriptOutput" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.8rem; color: #0f0; max-height: 300px; overflow-y: auto; display: none; white-space: pre-wrap; word-break: break-all;">
+              </div>
+              <button class="btn secondary" id="downloadScriptBtn" style="margin-top: 1rem; width: 100%; display: none;">
+                📥 Download Installation Script
+              </button>
+            </div>
+
+            <!-- Test Prompt -->
+            <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+              <h4 style="color: var(--primary); margin-bottom: 1rem;">✅ Test Generated Prompt</h4>
+              <div style="display: grid; grid-template-columns: 1fr 150px; gap: 1rem;">
+                <input type="text" id="testPromptInput" placeholder="Enter your generated prompt to test..." style="padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light);">
+                <button class="btn" id="testPromptBtn">
+                  🧪 Test Prompt
+                </button>
+              </div>
+              <div id="testResults" style="margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; color: var(--text-light); font-size: 0.9rem; display: none;">
+              </div>
+            </div>
+
+            <!-- GitHub Workflow -->
+            <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">🔄 Generate GitHub Actions Workflow</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <button class="btn workflow-btn" data-type="nodejs" style="font-size: 0.8rem;">Node.js CI/CD</button>
+                <button class="btn workflow-btn" data-type="python" style="font-size: 0.8rem;">Python CI/CD</button>
+                <button class="btn workflow-btn" data-type="lamp" style="font-size: 0.8rem;">LAMP CI/CD</button>
+              </div>
+              <div id="workflowOutput" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--text-light); max-height: 250px; overflow-y: auto; display: none; white-space: pre-wrap;">
+              </div>
+              <button class="btn secondary" id="copyWorkflowBtn" style="margin-top: 1rem; width: 100%; display: none;">
+                📋 Copy Workflow
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>✨ Claude Prompt Engine v2.0 | Advanced AI Prompt Generation</p>
+      <p>Built with ❤️ for developers who love AI</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="features.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!-- TELEPHONY & AI CONFIGURATION SECTION -->
+
+<!-- Telephony Carriers Tab -->
+<div id="telephony" class="tab-content">
+  <div class="form-group">
+    <h3 style="color: var(--primary); margin-bottom: 1rem;">☎️ Telephony Platform Configuration</h3>
+    
+    <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+      <h4 style="color: var(--primary); margin-bottom: 1rem;">Available Carriers</h4>
+      <div id="carriersList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+      <h4 style="color: var(--accent); margin-bottom: 1rem;">Selected Carrier Configuration</h4>
+      <div id="carrierConfig" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--text-light); white-space: pre-wrap; max-height: 300px; overflow-y: auto;">
+        Select a carrier to view configuration...
+      </div>
+    </div>
+
+    <div style="background: rgba(0, 153, 204, 0.05); border: 1px solid rgba(0, 153, 204, 0.2); padding: 1.5rem; border-radius: 10px;">
+      <h4 style="color: var(--secondary); margin-bottom: 1rem;">Available Protocols</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem;">
+        <div style="background: rgba(0, 217, 255, 0.1); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(0, 217, 255, 0.3);">
+          <strong>SIP</strong><br><span style="font-size: 0.85rem; color: var(--text-dim);">Session Initiation Protocol</span>
+        </div>
+        <div style="background: rgba(0, 217, 255, 0.1); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(0, 217, 255, 0.3);">
+          <strong>REST</strong><br><span style="font-size: 0.85rem; color: var(--text-dim);">HTTP/REST API</span>
+        </div>
+        <div style="background: rgba(0, 217, 255, 0.1); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(0, 217, 255, 0.3);">
+          <strong>WebRTC</strong><br><span style="font-size: 0.85rem; color: var(--text-dim);">Real-time Communication</span>
+        </div>
+        <div style="background: rgba(0, 217, 255, 0.1); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(0, 217, 255, 0.3);">
+          <strong>IAX2</strong><br><span style="font-size: 0.85rem; color: var(--text-dim);">Inter-Asterisk Exchange</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dial Plans Tab -->
+<div id="dialplans" class="tab-content">
+  <div class="form-group">
+    <h3 style="color: var(--primary); margin-bottom: 1rem;">📞 Dial Plans & Call Routing</h3>
+    
+    <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;">
+      <h4 style="color: var(--primary); margin-bottom: 1rem;">Available Dial Plans</h4>
+      <div id="dialplansList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px;">
+      <h4 style="color: var(--accent); margin-bottom: 1rem;">Dial Plan Details</h4>
+      <div id="dialplanDetail" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--text-light); white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+        Select a dial plan to view details...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Configuration Tab -->
+<div id="aiconfig" class="tab-content">
+  <div class="form-group">
+    <h3 style="color: var(--primary); margin-bottom: 1rem;">🤖 AI Configuration & Capabilities</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <!-- Speech Recognition -->
+      <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+        <h4 style="color: var(--primary); margin-bottom: 1rem;">🎙️ Speech Recognition</h4>
+        <div id="sttOptions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Text-to-Speech -->
+      <div style="background: rgba(0, 153, 204, 0.05); border: 1px solid rgba(0, 153, 204, 0.2); padding: 1.5rem; border-radius: 10px;">
+        <h4 style="color: var(--secondary); margin-bottom: 1rem;">🔊 Text-to-Speech</h4>
+        <div id="ttsOptions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- NLP & Intent Recognition -->
+      <div style="background: rgba(255, 0, 110, 0.05); border: 1px solid rgba(255, 0, 110, 0.2); padding: 1.5rem; border-radius: 10px;">
+        <h4 style="color: var(--accent); margin-bottom: 1rem;">🧠 NLP & Intent Recognition</h4>
+        <div id="nlpOptions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Voice Analysis -->
+      <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.2); padding: 1.5rem; border-radius: 10px;">
+        <h4 style="color: var(--primary); margin-bottom: 1rem;">🎯 Voice Analysis Features</h4>
+        <div id="voiceFeatures" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Settings -->
+    <div style="background: rgba(0, 153, 204, 0.05); border: 1px solid rgba(0, 153, 204, 0.2); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem;">
+      <h4 style="color: var(--secondary); margin-bottom: 1rem;">🎵 Voice Settings</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+        <div>
+          <label style="color: var(--primary);">Accent</label>
+          <select style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light); margin-top: 0.3rem;">
+            <option>British</option>
+            <option>American</option>
+            <option>Australian</option>
+            <option>Indian</option>
+            <option>French</option>
+          </select>
+        </div>
+        <div>
+          <label style="color: var(--primary);">Gender</label>
+          <select style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light); margin-top: 0.3rem;">
+            <option>Male</option>
+            <option>Female</option>
+            <option>Neutral</option>
+          </select>
+        </div>
+        <div>
+          <label style="color: var(--primary);">Emotion</label>
+          <select style="width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 5px; color: var(--text-light); margin-top: 0.3rem;">
+            <option>Professional</option>
+            <option>Friendly</option>
+            <option>Concerned</option>
+            <option>Happy</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Browser Extensions Tab -->
+<div id="extensions" class="tab-content">
+  <div class="form-group">
+    <h3 style="color: var(--primary); margin-bottom: 1rem;">🧩 Browser Extensions</h3>
+    
+    <div id="extensionsList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Personal AI Guide Tab -->
+<div id="personalai" class="tab-content">
+  <div class="form-group">
+    <h3 style="color: var(--primary); margin-bottom: 1rem;">🤖 Create Your Personal AI with Copilot</h3>
+    
+    <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(255, 0, 110, 0.1)); border: 1px solid rgba(0, 217, 255, 0.2); padding: 2rem; border-radius: 10px;">
+      <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1.2rem;">5-Step Guide to Your Personal AI</h4>
+      
+      <div style="display: grid; gap: 1.5rem;">
+        <!-- Step 1 -->
+        <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
+          <h5 style="color: var(--primary); margin-bottom: 0.5rem;">Step 1️⃣ Install GitHub Copilot</h5>
+          <p style="color: var(--text-light); font-size: 0.9rem;">Get Copilot subscription and install in VS Code or JetBrains. Start with the free trial!</p>
+          <button class="btn" style="margin-top: 0.5rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            📖 Read Full Guide
+          </button>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--secondary);">
+          <h5 style="color: var(--secondary); margin-bottom: 0.5rem;">Step 2️⃣ Configure Your Preferences</h5>
+          <p style="color: var(--text-light); font-size: 0.9rem;">Set up coding style, language preferences, frameworks, and shortcuts.</p>
+          <button class="btn" style="margin-top: 0.5rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            ⚙️ Configuration Template
+          </button>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent);">
+          <h5 style="color: var(--accent); margin-bottom: 0.5rem;">Step 3️⃣ Build Your AI Engine</h5>
+          <p style="color: var(--text-light); font-size: 0.9rem;">Create core engine with memory system, context manager, and prompt builder.</p>
+          <button class="btn" style="margin-top: 0.5rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            💻 Get Starter Code
+          </button>
+        </div>
+
+        <!-- Step 4 -->
+        <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
+          <h5 style="color: var(--primary); margin-bottom: 0.5rem;">Step 4️⃣ Create Extensions</h5>
+          <p style="color: var(--text-light); font-size: 0.9rem;">Build VS Code extension, Slack bot, or web integration for your AI.</p>
+          <button class="btn" style="margin-top: 0.5rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            🧩 Extension Templates
+          </button>
+        </div>
+
+        <!-- Step 5 -->
+        <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--secondary);">
+          <h5 style="color: var(--secondary); margin-bottom: 0.5rem;">Step 5️⃣ Deploy & Train</h5>
+          <p style="color: var(--text-light); font-size: 0.9rem;">Deploy to cloud, train on your patterns, and iterate based on feedback.</p>
+          <button class="btn" style="margin-top: 0.5rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            🚀 Deployment Guide
+          </button>
+        </div>
+      </div>
+
+      <div style="background: rgba(0, 217, 255, 0.05); border: 1px solid rgba(0, 217, 255, 0.3); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+        <strong style="color: var(--primary);">💡 Pro Tip:</strong>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">Start with Copilot in your IDE. Gradually build your personal AI with Claude or GPT-4 for advanced features. Combine multiple models for best results!</p>
+      </div>
+    </div>
+  </div>
+</div>

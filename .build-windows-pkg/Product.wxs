@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" 
+           Name="Claude Prompt Engine" 
+           Language="1033" 
+           Version="1.0.0.0" 
+           Manufacturer="Claude Prompt Engine" 
+           UpgradeCode="12345678-1234-1234-1234-123456789012">
+    
+    <Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine" 
+             Description="Claude Prompt Engine - AI Prompt Generator" />
+    
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+    <MediaSource Id="1" Cabinet="product.cab" />
+    
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Claude Prompt Engine" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Claude Prompt Engine" />
+      </Directory>
+      <Directory Id="DesktopFolder" />
+    </Directory>
+    
+    <Feature Id="ProductFeature" Title="Claude Prompt Engine" Level="1">
+      <ComponentRef Id="ApplicationFiles" />
+      <ComponentRef Id="StartMenuShortcuts" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+    
+    <Component Id="ApplicationFiles" Directory="INSTALLFOLDER">
+      <File Id="ServerJS" Source="server.js" />
+      <File Id="PackageJSON" Source="package.json" />
+      <File Id="ReadmeMD" Source="README.md" />
+    </Component>
+    
+    <Component Id="StartMenuShortcuts" Directory="ApplicationProgramsFolder">
+      <Shortcut Id="ApplicationStartMenuShortcut" 
+                Name="Claude Prompt Engine" 
+                Description="Start Claude Prompt Engine" 
+                Target="[INSTALLFOLDER]start.bat" />
+      <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" 
+                     Key="Software\Microsoft\Windows\CurrentVersion\Run" 
+                     Name="ClaudePromptEngine" 
+                     Value="[INSTALLFOLDER]start.bat" 
+                     Type="string" 
+                     KeyPath="yes" />
+    </Component>
+    
+    <Component Id="DesktopShortcut" Directory="DesktopFolder">
+      <Shortcut Id="DesktopShortcut" 
+                Name="Claude Prompt Engine" 
+                Target="[INSTALLFOLDER]start.bat" />
+      <RegistryValue Root="HKCU" 
+                     Key="Software\Claude Prompt Engine" 
+                     Name="installed" 
+                     Value="1" 
+                     Type="integer" 
+                     KeyPath="yes" />
+    </Component>
+    
+    <UI />
+  </Product>
+</Wix>

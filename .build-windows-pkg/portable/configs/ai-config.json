@@ -1,0 +1,227 @@
+{
+  "aiModels": {
+    "speechRecognition": [
+      {
+        "id": "google-stt",
+        "name": "Google Cloud Speech-to-Text",
+        "accuracy": "95%+",
+        "latency": "500-1000ms",
+        "languages": 125,
+        "realtime": true,
+        "pricing": "$0.024 per 15 second increment",
+        "features": ["Noise reduction", "Context awareness", "Custom vocabulary"],
+        "bestFor": "High accuracy, multilingual"
+      },
+      {
+        "id": "azure-speech",
+        "name": "Azure Speech Services",
+        "accuracy": "95%+",
+        "latency": "300-800ms",
+        "languages": 85,
+        "realtime": true,
+        "pricing": "$1 per audio hour",
+        "features": ["Noise cancellation", "Intent recognition", "Entity extraction"],
+        "bestFor": "Enterprise, integration"
+      },
+      {
+        "id": "deepgram",
+        "name": "Deepgram",
+        "accuracy": "94%+",
+        "latency": "100-300ms",
+        "languages": 20,
+        "realtime": true,
+        "pricing": "$0.0043 per minute",
+        "features": ["Low latency", "Custom models", "Speaker identification"],
+        "bestFor": "Low latency, voice apps"
+      },
+      {
+        "id": "openai-whisper",
+        "name": "OpenAI Whisper",
+        "accuracy": "94%+",
+        "latency": "1-5 seconds",
+        "languages": 99,
+        "realtime": false,
+        "pricing": "Free (OpenAI) / $0.02 per minute (API)",
+        "features": ["Multilingual", "Robust", "Cost-effective"],
+        "bestFor": "Accuracy, cost, offline"
+      },
+      {
+        "id": "nvidia-riva",
+        "name": "NVIDIA Riva",
+        "accuracy": "92%+",
+        "latency": "50-200ms",
+        "languages": 10,
+        "realtime": true,
+        "pricing": "Self-hosted",
+        "features": ["On-device", "Low latency", "Enterprise-ready"],
+        "bestFor": "On-premise, low latency"
+      }
+    ],
+    "textToSpeech": [
+      {
+        "id": "google-tts",
+        "name": "Google Cloud Text-to-Speech",
+        "quality": "Natural",
+        "voices": 375,
+        "languages": 40,
+        "latency": "1-3 seconds",
+        "pricing": "$16 per 1M characters",
+        "features": ["WaveNet voices", "Emotion control", "SSML support"],
+        "bestFor": "Natural sounding, variety"
+      },
+      {
+        "id": "azure-tts",
+        "name": "Azure Text-to-Speech",
+        "quality": "Natural",
+        "voices": 400,
+        "languages": 70,
+        "latency": "500-1500ms",
+        "pricing": "$16 per 1M characters",
+        "features": ["Neural voices", "Emotional expression", "Custom voices"],
+        "bestFor": "Enterprise, customization"
+      },
+      {
+        "id": "elevenlabs",
+        "name": "ElevenLabs",
+        "quality": "Premium",
+        "voices": 32,
+        "languages": 28,
+        "latency": "500-2000ms",
+        "pricing": "$5 for 10k characters",
+        "features": ["Premium quality", "Voice cloning", "Emotional control"],
+        "bestFor": "Premium quality, voices"
+      },
+      {
+        "id": "polly",
+        "name": "Amazon Polly",
+        "quality": "Natural",
+        "voices": 200,
+        "languages": 30,
+        "latency": "1-2 seconds",
+        "pricing": "$0.002 per 1000 characters",
+        "features": ["Neural voices", "SSML", "Emotional control"],
+        "bestFor": "Cost-effective, AWS integration"
+      }
+    ],
+    "nlpAndIntent": [
+      {
+        "id": "openai-gpt",
+        "name": "OpenAI GPT-4 / GPT-3.5",
+        "accuracy": "96%+",
+        "languages": 100,
+        "contextWindow": "128k tokens (GPT-4)",
+        "realtime": true,
+        "pricing": "GPT-4: $0.03/1k input, $0.06/1k output",
+        "features": ["Few-shot learning", "Reasoning", "Multi-language"],
+        "bestFor": "Complex reasoning, flexibility"
+      },
+      {
+        "id": "claude-ai",
+        "name": "Claude (Anthropic)",
+        "accuracy": "97%+",
+        "languages": 50,
+        "contextWindow": "100k tokens",
+        "realtime": true,
+        "pricing": "$0.008/1k input, $0.024/1k output",
+        "features": ["Constitutional AI", "Safety focus", "Large context"],
+        "bestFor": "Safety, reliability, nuance"
+      },
+      {
+        "id": "dialogflow",
+        "name": "Google Dialogflow",
+        "accuracy": "92%+",
+        "languages": 14,
+        "contextWindow": "Session-based",
+        "realtime": true,
+        "pricing": "$0.005 per text request",
+        "features": ["Intent recognition", "Entity extraction", "Context management"],
+        "bestFor": "Chatbots, conversational"
+      },
+      {
+        "id": "rasa",
+        "name": "Rasa",
+        "accuracy": "90%+",
+        "languages": ["Multiple"],
+        "contextWindow": "Custom",
+        "realtime": true,
+        "pricing": "Open source",
+        "features": ["Full customization", "On-premise", "ML-based"],
+        "bestFor": "Full control, customization"
+      },
+      {
+        "id": "luis",
+        "name": "Azure LUIS",
+        "accuracy": "92%+",
+        "languages": 12,
+        "contextWindow": "Session-based",
+        "realtime": true,
+        "pricing": "$1.50 per 1k requests",
+        "features": ["Intent/entity recognition", "Training", "Prebuilt domains"],
+        "bestFor": "Azure ecosystem, enterprise"
+      }
+    ],
+    "voiceRecognition": [
+      {
+        "id": "speaker-identification",
+        "name": "Speaker Identification",
+        "accuracy": "98%+",
+        "languages": "Language-agnostic",
+        "features": ["Diarization", "Speaker separation", "Enrollment"],
+        "useCase": "Multi-speaker calls, compliance"
+      },
+      {
+        "id": "emotion-detection",
+        "name": "Emotion Detection",
+        "accuracy": "85%+",
+        "emotions": ["Happy", "Sad", "Angry", "Neutral", "Frustrated"],
+        "realtime": true,
+        "useCase": "Sentiment analysis, escalation"
+      },
+      {
+        "id": "voice-biometric",
+        "name": "Voice Biometric Authentication",
+        "accuracy": "99%+",
+        "languages": "Language-independent",
+        "features": ["Liveness detection", "Anti-spoofing"],
+        "useCase": "Secure authentication, compliance"
+      }
+    ]
+  },
+  "voiceSettings": {
+    "accent": ["British", "American", "Australian", "Indian", "French", "Spanish"],
+    "gender": ["Male", "Female", "Neutral"],
+    "speed": "0.5 - 2.0x",
+    "pitch": "-20 to +20 semitones",
+    "emotion": ["Happy", "Sad", "Professional", "Friendly", "Concerned"]
+  },
+  "capabilities": {
+    "realtime": ["Speech-to-text", "Intent recognition", "Response generation", "Text-to-speech"],
+    "nlp": ["Named Entity Recognition", "Sentiment analysis", "Topic classification", "Language detection"],
+    "voiceAnalysis": ["Speaker identification", "Emotion detection", "Quality metrics", "Speech patterns"],
+    "customization": ["Custom vocabulary", "Fine-tuned models", "Domain-specific training", "Voice cloning"]
+  },
+  "memoryManagement": {
+    "sessionMemory": {
+      "duration": "Call session",
+      "storage": "In-memory",
+      "useCase": "Context within single call"
+    },
+    "userMemory": {
+      "duration": "Persistent",
+      "storage": "Database",
+      "useCase": "User preferences, history"
+    },
+    "contextMemory": {
+      "duration": "Long-term",
+      "storage": "Vector database",
+      "useCase": "Semantic understanding, personalization"
+    }
+  },
+  "integrations": {
+    "crm": ["Salesforce", "HubSpot", "Pipedrive", "Zendesk"],
+    "calendar": ["Google Calendar", "Outlook", "Slack"],
+    "messaging": ["SMS", "WhatsApp", "Telegram", "Slack"],
+    "analytics": ["Google Analytics", "Amplitude", "Mixpanel"],
+    "ai": ["Claude", "GPT-4", "Rasa", "Custom models"]
+  }
+}

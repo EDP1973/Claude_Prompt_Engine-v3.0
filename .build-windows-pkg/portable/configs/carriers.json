@@ -1,0 +1,211 @@
+{
+  "carriers": [
+    {
+      "id": "twilio",
+      "name": "Twilio",
+      "icon": "🌐",
+      "type": "VoIP",
+      "region": "Global",
+      "features": [
+        "SIP",
+        "REST API",
+        "WebRTC",
+        "SMS Gateway",
+        "Voice Recording"
+      ],
+      "pricing": "Pay-per-use",
+      "apiEndpoint": "https://api.twilio.com",
+      "authentication": "Bearer Token",
+      "protocols": ["SIP", "REST", "WebRTC"],
+      "bandwidth": "Unlimited",
+      "latency": "~50ms",
+      "supportedCodecs": ["OPUS", "G.711", "G.729"],
+      "aiIntegration": "Native",
+      "documentation": "https://www.twilio.com/docs"
+    },
+    {
+      "id": "asterisk-voip",
+      "name": "Asterisk VoIP",
+      "icon": "☎️",
+      "type": "PBX",
+      "region": "Self-hosted",
+      "features": [
+        "Call Routing",
+        "IVR",
+        "Conference Bridge",
+        "Call Recording",
+        "Voicemail"
+      ],
+      "pricing": "Open Source",
+      "apiEndpoint": "http://localhost:5060",
+      "authentication": "SIP Credentials",
+      "protocols": ["SIP", "IAX2", "H.323"],
+      "bandwidth": "Limited by server",
+      "latency": "~10-30ms",
+      "supportedCodecs": ["G.711", "G.729", "SPEEX"],
+      "aiIntegration": "Via AGI/ARI",
+      "documentation": "https://www.asterisk.org/get-started"
+    },
+    {
+      "id": "genesys",
+      "name": "Genesys Cloud",
+      "icon": "☁️",
+      "type": "Cloud CCaaS",
+      "region": "Global",
+      "features": [
+        "Contact Center",
+        "Omnichannel",
+        "Analytics",
+        "Workforce Management",
+        "AI Assistant"
+      ],
+      "pricing": "Enterprise",
+      "apiEndpoint": "https://api.mypurecloud.com",
+      "authentication": "OAuth 2.0",
+      "protocols": ["REST", "WebRTC"],
+      "bandwidth": "Managed",
+      "latency": "~100ms",
+      "supportedCodecs": ["OPUS", "G.711"],
+      "aiIntegration": "Built-in",
+      "documentation": "https://developer.genesys.cloud"
+    },
+    {
+      "id": "nexmo",
+      "name": "Vonage Nexmo",
+      "icon": "📱",
+      "type": "VoIP",
+      "region": "Global",
+      "features": [
+        "Voice API",
+        "SMS",
+        "Video",
+        "Messages API",
+        "Voice Recording"
+      ],
+      "pricing": "Pay-per-use",
+      "apiEndpoint": "https://api.nexmo.com",
+      "authentication": "API Key/Secret",
+      "protocols": ["SIP", "REST"],
+      "bandwidth": "Unlimited",
+      "latency": "~50-70ms",
+      "supportedCodecs": ["OPUS", "G.711"],
+      "aiIntegration": "Integrations available",
+      "documentation": "https://developer.vonage.com"
+    },
+    {
+      "id": "jambonz",
+      "name": "Jambonz",
+      "icon": "🎵",
+      "type": "VoIP Platform",
+      "region": "Global",
+      "features": [
+        "SBC",
+        "Call Control",
+        "IVR",
+        "Conference",
+        "Real-time APIs"
+      ],
+      "pricing": "Open Source",
+      "apiEndpoint": "http://localhost:3000",
+      "authentication": "JWT",
+      "protocols": ["SIP", "WebRTC"],
+      "bandwidth": "Scalable",
+      "latency": "~20ms",
+      "supportedCodecs": ["OPUS", "G.711", "G.729"],
+      "aiIntegration": "Via WebSockets",
+      "documentation": "https://jambonz.org"
+    },
+    {
+      "id": "telnyx",
+      "name": "Telnyx",
+      "icon": "⚡",
+      "type": "VoIP",
+      "region": "Global",
+      "features": [
+        "Voice API",
+        "SMS",
+        "Call Recording",
+        "Real-time Calling",
+        "Programmable Voice"
+      ],
+      "pricing": "Pay-per-use",
+      "apiEndpoint": "https://api.telnyx.com",
+      "authentication": "Bearer Token",
+      "protocols": ["SIP", "REST"],
+      "bandwidth": "Unlimited",
+      "latency": "~40ms",
+      "supportedCodecs": ["OPUS", "G.711", "G.729"],
+      "aiIntegration": "Via webhooks",
+      "documentation": "https://developers.telnyx.com"
+    },
+    {
+      "id": "freepbx",
+      "name": "FreePBX",
+      "icon": "🔧",
+      "type": "PBX",
+      "region": "Self-hosted",
+      "features": [
+        "Business PBX",
+        "IVR",
+        "Call Routing",
+        "Recording",
+        "Analytics"
+      ],
+      "pricing": "Open Source",
+      "apiEndpoint": "http://localhost:80",
+      "authentication": "Session-based",
+      "protocols": ["SIP", "IAX2"],
+      "bandwidth": "Limited by server",
+      "latency": "~15-25ms",
+      "supportedCodecs": ["G.711", "G.729", "SPEEX"],
+      "aiIntegration": "Via modules",
+      "documentation": "https://www.freepbx.org"
+    },
+    {
+      "id": "amazon-connect",
+      "name": "Amazon Connect",
+      "icon": "☁️",
+      "type": "Cloud CCaaS",
+      "region": "AWS Regions",
+      "features": [
+        "Contact Center",
+        "IVR",
+        "Chat",
+        "Analytics",
+        "AI/ML Integration"
+      ],
+      "pricing": "Pay-per-minute",
+      "apiEndpoint": "https://connect.amazonaws.com",
+      "authentication": "AWS IAM",
+      "protocols": ["REST", "WebRTC"],
+      "bandwidth": "Managed",
+      "latency": "~80-100ms",
+      "supportedCodecs": ["OPUS", "G.711"],
+      "aiIntegration": "AWS Lex, Polly",
+      "documentation": "https://docs.aws.amazon.com/connect"
+    },
+    {
+      "id": "custom-sip",
+      "name": "Custom SIP Server",
+      "icon": "🛠️",
+      "type": "SIP",
+      "region": "Custom",
+      "features": [
+        "Full Control",
+        "Custom routing",
+        "Integration ready",
+        "Flexible codecs",
+        "Custom AI hooks"
+      ],
+      "pricing": "Custom",
+      "apiEndpoint": "Custom",
+      "authentication": "Custom",
+      "protocols": ["SIP"],
+      "bandwidth": "Custom",
+      "latency": "Custom",
+      "supportedCodecs": ["Custom"],
+      "aiIntegration": "Custom",
+      "documentation": "Custom"
+    }
+  ]
+}

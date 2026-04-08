@@ -1,0 +1,222 @@
+{
+  "extensions": [
+    {
+      "id": "copilot-prompt-injector",
+      "name": "Copilot Prompt Injector",
+      "type": "Browser Extension",
+      "icon": "💻",
+      "version": "1.0.0",
+      "platforms": ["Chrome", "Firefox", "Edge", "Safari"],
+      "description": "Inject prompts into web forms and text areas",
+      "features": [
+        "One-click prompt injection",
+        "Keyboard shortcuts",
+        "Auto-formatting",
+        "Save favorite prompts",
+        "Template management"
+      ],
+      "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "webRequest"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "ai-call-recorder",
+      "name": "AI Call Recorder",
+      "type": "Browser Extension",
+      "icon": "🎙️",
+      "version": "1.0.0",
+      "platforms": ["Chrome", "Firefox"],
+      "description": "Record and transcribe voice calls in browser",
+      "features": [
+        "One-click recording",
+        "Real-time transcription",
+        "Noise reduction",
+        "Speaker identification",
+        "AI summary generation",
+        "Export options"
+      ],
+      "permissions": [
+        "microphone",
+        "storage",
+        "webRequest",
+        "mediaStream"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "code-assistant-sidebar",
+      "name": "Code Assistant Sidebar",
+      "type": "Browser Extension",
+      "icon": "⚙️",
+      "version": "2.0.0",
+      "platforms": ["Chrome", "Firefox", "Edge"],
+      "description": "IDE-like assistant for coding in browser",
+      "features": [
+        "Code generation",
+        "Code review",
+        "Documentation lookup",
+        "Real-time suggestions",
+        "Multi-language support",
+        "Debugging help"
+      ],
+      "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "webRequest"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "voice-command-controller",
+      "name": "Voice Command Controller",
+      "type": "Browser Extension",
+      "icon": "🎤",
+      "version": "1.5.0",
+      "platforms": ["Chrome", "Firefox", "Edge", "Safari"],
+      "description": "Control browser and web apps with voice",
+      "features": [
+        "Voice commands",
+        "Natural language interface",
+        "Custom command recording",
+        "Multi-language support",
+        "Offline mode",
+        "Accessibility support"
+      ],
+      "permissions": [
+        "microphone",
+        "scripting",
+        "storage",
+        "commands"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "ai-note-organizer",
+      "name": "AI Note Organizer",
+      "type": "Browser Extension",
+      "icon": "📝",
+      "version": "1.2.0",
+      "platforms": ["Chrome", "Firefox"],
+      "description": "Auto-organize notes with AI tagging",
+      "features": [
+        "Auto-tagging",
+        "Smart categorization",
+        "Search optimization",
+        "Note summarization",
+        "Cross-tab organization",
+        "Sync to cloud"
+      ],
+      "permissions": [
+        "storage",
+        "clipboardWrite",
+        "webRequest"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "meeting-ai-assistant",
+      "name": "Meeting AI Assistant",
+      "type": "Browser Extension",
+      "icon": "👥",
+      "version": "2.1.0",
+      "platforms": ["Chrome", "Firefox", "Edge"],
+      "description": "AI assistance for video meetings",
+      "features": [
+        "Real-time transcription",
+        "Meeting summary",
+        "Action item extraction",
+        "Q&A generation",
+        "Agenda suggestions",
+        "Follow-up emails"
+      ],
+      "permissions": [
+        "activeTab",
+        "tabCapture",
+        "microphone",
+        "storage"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "content-summarizer",
+      "name": "Content Summarizer",
+      "type": "Browser Extension",
+      "icon": "📄",
+      "version": "1.3.0",
+      "platforms": ["Chrome", "Firefox", "Edge", "Safari"],
+      "description": "Summarize web pages and articles with AI",
+      "features": [
+        "One-click summarization",
+        "Custom length",
+        "Key point extraction",
+        "Multiple formats",
+        "Translation support",
+        "Save & share"
+      ],
+      "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    },
+    {
+      "id": "copywriting-enhancer",
+      "name": "Copywriting Enhancer",
+      "type": "Browser Extension",
+      "icon": "✍️",
+      "version": "1.8.0",
+      "platforms": ["Chrome", "Firefox", "Edge"],
+      "description": "Enhance your writing with AI suggestions",
+      "features": [
+        "Grammar checking",
+        "Tone adjustment",
+        "Synonym suggestions",
+        "Readability scoring",
+        "SEO optimization",
+        "Multiple writing styles"
+      ],
+      "permissions": [
+        "activeTab",
+        "scripting",
+        "contextMenus"
+      ],
+      "installUrl": "https://chrome.google.com/webstore"
+    }
+  ],
+  "extensionAPI": {
+    "baseUrl": "http://localhost:3000/api/extensions",
+    "methods": [
+      {
+        "name": "injectPrompt",
+        "method": "POST",
+        "params": ["elementId", "prompt"]
+      },
+      {
+        "name": "recordCall",
+        "method": "POST",
+        "params": ["callId", "duration"]
+      },
+      {
+        "name": "generateSummary",
+        "method": "POST",
+        "params": ["content", "length"]
+      },
+      {
+        "name": "getCodeSuggestions",
+        "method": "POST",
+        "params": ["code", "language"]
+      },
+      {
+        "name": "executeVoiceCommand",
+        "method": "POST",
+        "params": ["command", "context"]
+      }
+    ]
+  }
+}

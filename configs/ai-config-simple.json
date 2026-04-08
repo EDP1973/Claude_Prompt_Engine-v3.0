@@ -1,0 +1,122 @@
+{
+  "speechRecognition": [
+    {
+      "id": "google-stt",
+      "name": "Google Cloud Speech-to-Text",
+      "accuracy": "95%+",
+      "languages": 125
+    },
+    {
+      "id": "azure-speech",
+      "name": "Azure Speech Services",
+      "accuracy": "95%+",
+      "languages": 85
+    },
+    {
+      "id": "deepgram",
+      "name": "Deepgram",
+      "accuracy": "94%+",
+      "languages": 20
+    },
+    {
+      "id": "openai-whisper",
+      "name": "OpenAI Whisper",
+      "accuracy": "94%+",
+      "languages": 99
+    },
+    {
+      "id": "nvidia-riva",
+      "name": "NVIDIA Riva",
+      "accuracy": "93%+",
+      "languages": 12
+    }
+  ],
+  "textToSpeech": [
+    {
+      "id": "google-tts",
+      "name": "Google Cloud TTS",
+      "voices": 220,
+      "naturalness": "Premium",
+      "languages": 50
+    },
+    {
+      "id": "azure-tts",
+      "name": "Azure TTS",
+      "voices": 200,
+      "naturalness": "Premium",
+      "languages": 80
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "voices": 100,
+      "naturalness": "Ultra",
+      "languages": 29
+    },
+    {
+      "id": "google-wavenet",
+      "name": "Google WaveNet",
+      "voices": 60,
+      "naturalness": "Premium",
+      "languages": 45
+    }
+  ],
+  "nlpAndIntent": [
+    {
+      "id": "dialogflow",
+      "name": "Google Dialogflow",
+      "intents": 5000,
+      "languages": 45
+    },
+    {
+      "id": "luis",
+      "name": "Microsoft LUIS",
+      "intents": 5000,
+      "languages": 50
+    },
+    {
+      "id": "wit",
+      "name": "Wit.AI",
+      "intents": 10000,
+      "languages": 120
+    },
+    {
+      "id": "rasa",
+      "name": "Rasa",
+      "intents": "Custom",
+      "languages": 50
+    },
+    {
+      "id": "alexa",
+      "name": "Amazon Alexa Skills",
+      "intents": 10000,
+      "languages": 10
+    }
+  ],
+  "voiceRecognition": {
+    "speakerIdentification": true,
+    "emotionDetection": true,
+    "toneAnalysis": true,
+    "languageDetection": true
+  },
+  "voiceSettings": {
+    "accents": ["British", "American", "Australian", "Indian"],
+    "genders": ["Male", "Female", "Neutral"],
+    "emotions": ["Professional", "Friendly", "Concerned", "Happy"]
+  },
+  "capabilities": {
+    "realtime": true,
+    "streaming": true,
+    "offline": true,
+    "customization": true,
+    "multimodal": true
+  },
+  "integrations": [
+    "Twilio",
+    "AWS Connect",
+    "Google Cloud",
+    "Azure",
+    "Asterisk",
+    "FreePBX"
+  ]
+}

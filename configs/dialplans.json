@@ -1,0 +1,232 @@
+{
+  "dialPlans": [
+    {
+      "id": "basic-ivr",
+      "name": "Basic IVR",
+      "icon": "📞",
+      "description": "Simple Interactive Voice Response menu",
+      "useCase": "Customer support, information requests",
+      "complexity": "Easy",
+      "rules": [
+        {
+          "name": "Main Menu",
+          "prompt": "Press 1 for sales, 2 for support, 3 for billing",
+          "timeout": 5,
+          "retries": 3
+        },
+        {
+          "name": "Route to Department",
+          "action": "Forward",
+          "targetMap": {
+            "1": "sales-queue",
+            "2": "support-queue",
+            "3": "billing-queue"
+          }
+        }
+      ],
+      "aiFeatures": ["Intent Recognition", "Routing"],
+      "recordingEnabled": true,
+      "dtmfEnabled": true
+    },
+    {
+      "id": "voicebot-support",
+      "name": "Voice Bot Support",
+      "icon": "🤖",
+      "description": "AI-powered voice bot for customer service",
+      "useCase": "24/7 support, order status, FAQ",
+      "complexity": "Advanced",
+      "rules": [
+        {
+          "name": "Welcome Message",
+          "prompt": "Welcome! How can I help you today?",
+          "aiPowered": true,
+          "nlpModel": "DialogFlow | Rasa | Claude"
+        },
+        {
+          "name": "Intent Handling",
+          "action": "AI Classification",
+          "intents": [
+            "OrderStatus",
+            "Returns",
+            "Billing",
+            "General Inquiry",
+            "HumanTransfer"
+          ]
+        },
+        {
+          "name": "Resolution or Escalation",
+          "action": "Handle or Transfer",
+          "escalationCriteria": "Confidence < 0.6"
+        }
+      ],
+      "aiFeatures": [
+        "Speech Recognition",
+        "NLU",
+        "Intent Recognition",
+        "Sentiment Analysis"
+      ],
+      "recordingEnabled": true,
+      "ttsVoice": "neural"
+    },
+    {
+      "id": "call-center-routing",
+      "name": "Call Center Routing",
+      "icon": "👥",
+      "description": "Intelligent call routing for contact centers",
+      "useCase": "Enterprise support, sales, customer service",
+      "complexity": "Complex",
+      "rules": [
+        {
+          "name": "Caller Identification",
+          "action": "CallerID + CRM Lookup"
+        },
+        {
+          "name": "Priority Routing",
+          "algorithm": "Weighted Round Robin",
+          "criteria": [
+            "Agent skill level",
+            "Queue depth",
+            "Average handle time",
+            "Customer VIP status"
+          ]
+        },
+        {
+          "name": "Queue Management",
+          "maxWaitTime": 300,
+          "callbackOption": true,
+          "announcements": "Every 30 seconds"
+        }
+      ],
+      "aiFeatures": [
+        "Skill-based routing",
+        "Predictive hold time",
+        "Sentiment-based escalation"
+      ],
+      "recordingEnabled": true,
+      "analyticsEnabled": true
+    },
+    {
+      "id": "conference-bridge",
+      "name": "Conference Bridge",
+      "icon": "🎤",
+      "description": "Multi-party conference calling",
+      "useCase": "Meetings, webinars, team calls",
+      "complexity": "Medium",
+      "rules": [
+        {
+          "name": "Conference Setup",
+          "maxParticipants": 500,
+          "recordingEnabled": true,
+          "moderatorControls": true
+        },
+        {
+          "name": "Participant Management",
+          "allowedActions": [
+            "Mute/Unmute",
+            "Hold",
+            "Remove",
+            "Lock conference"
+          ]
+        },
+        {
+          "name": "Recording & Transcription",
+          "format": "MP3/WAV",
+          "transcription": "Real-time"
+        }
+      ],
+      "aiFeatures": ["Speech Recognition", "Live Transcription"],
+      "recordingEnabled": true,
+      "ttsEnabled": true
+    },
+    {
+      "id": "outbound-campaign",
+      "name": "Outbound Campaign",
+      "icon": "📢",
+      "description": "Predictive dialing for outbound calls",
+      "useCase": "Sales, surveys, notifications",
+      "complexity": "Complex",
+      "rules": [
+        {
+          "name": "Dialing Strategy",
+          "algorithm": "Predictive / Progressive / Preview",
+          "agentAvailability": "Track",
+          "abandonmentRate": "Max 5%"
+        },
+        {
+          "name": "Do Not Call Compliance",
+          "dnc": "Always check",
+          "tcpa": "TCPA compliant"
+        },
+        {
+          "name": "Message Delivery",
+          "voicemail": "Enabled",
+          "messageTemplate": "Customizable"
+        }
+      ],
+      "aiFeatures": [
+        "Lead scoring",
+        "Optimal time prediction",
+        "Message personalization"
+      ],
+      "recordingEnabled": true,
+      "complianceEnabled": true
+    },
+    {
+      "id": "appointment-booking",
+      "name": "Appointment Booking",
+      "icon": "📅",
+      "description": "Automated appointment scheduling",
+      "useCase": "Healthcare, salons, consultants",
+      "complexity": "Medium",
+      "rules": [
+        {
+          "name": "Availability Check",
+          "source": "Integration with calendar/CRM",
+          "realTime": true
+        },
+        {
+          "name": "Booking Process",
+          "confirmationRequired": true,
+          "reminderEnabled": true,
+          "reminderTime": "24 hours before"
+        },
+        {
+          "name": "Slot Management",
+          "slotDuration": "15-60 minutes",
+          "bufferTime": "5-10 minutes"
+        }
+      ],
+      "aiFeatures": ["Intent Recognition", "Calendar Integration"],
+      "recordingEnabled": false,
+      "integrations": ["Google Calendar", "Outlook", "CRM systems"]
+    },
+    {
+      "id": "notification-broadcast",
+      "name": "Notification Broadcast",
+      "icon": "📣",
+      "description": "Mass notification delivery",
+      "useCase": "Alerts, reminders, announcements",
+      "complexity": "Simple",
+      "rules": [
+        {
+          "name": "Batch Processing",
+          "batchSize": 1000,
+          "rateLimit": "100 calls/second"
+        },
+        {
+          "name": "Message Delivery",
+          "retryPolicy": "Exponential backoff",
+          "maxRetries": 3
+        },
+        {
+          "name": "Recipient Management",
+          "dnc": "Respected",
+          "optOut": "Supported"
+        }
+      ],
+      "aiFeatures": ["Personalization"],
+      "recordingEnabled": false,
+      "complianceEnabled": true
+    }
+  ]
+}

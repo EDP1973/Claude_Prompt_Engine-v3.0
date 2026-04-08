@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Builder - Form Mode - Claude Prompt Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #b0b0b0;
+        }
+
+        /* Main Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            padding: 30px;
+        }
+
+        .panel h2 {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #d0d0d0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+
+        /* Condition Builder */
+        .condition-builder {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .condition-row {
+            display: grid;
+            grid-template-columns: 1fr 0.8fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .condition-row.last {
+            margin-bottom: 0;
+        }
+
+        .remove-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 77, 77, 0.2);
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 77, 77, 0.3);
+            transform: scale(1.05);
+        }
+
+        .logical-op {
+            text-align: center;
+            color: #b0b0b0;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        /* Column Selection */
+        .column-selector {
+            margin-bottom: 20px;
+        }
+
+        .column-selector label {
+            margin-bottom: 10px;
+        }
+
+        .column-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .column-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            color: #00d4ff;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .column-chip:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .column-chip.selected {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+        }
+
+        .column-chip .remove {
+            margin-left: 6px;
+            cursor: pointer;
+        }
+
+        /* Query Preview */
+        .query-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #00d4ff;
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+            word-break: break-all;
+        }
+
+        .query-preview.empty {
+            color: #999;
+            text-align: center;
+            padding: 30px;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: white;
+            flex: 1;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-copy {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-copy:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: #b0b0b0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #e0e0e0;
+        }
+
+        .tab.active {
+            color: #00d4ff;
+            border-bottom-color: #00d4ff;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #b0b0b0;
+        }
+
+        .info-box strong {
+            color: #00d4ff;
+        }
+
+        /* Saved Queries */
+        .saved-queries {
+            margin-top: 20px;
+        }
+
+        .query-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .query-item-name {
+            flex: 1;
+            color: #00d4ff;
+        }
+
+        .query-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .query-item-actions button {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .condition-row {
+                grid-template-columns: 1fr;
+            }
+
+            .remove-btn {
+                width: 100%;
+            }
+        }
+
+        /* Success Message */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔍 Query Builder</h1>
+            <p>Build complex MySQL queries with simple form controls</p>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="layout">
+            <!-- Left Panel: Query Builder -->
+            <div class="panel">
+                <h2>📝 Build Your Query</h2>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchMode('form')">📋 Form</button>
+                    <button class="tab" onclick="switchMode('visual')" style="opacity: 0.5;">🎨 Visual</button>
+                </div>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <strong>💡 Tip:</strong> Add conditions to filter your data. Use AND/OR logic to combine multiple conditions.
+                </div>
+
+                <!-- Column Selection -->
+                <div class="column-selector">
+                    <label>Select Columns to Return (Leave empty for all)</label>
+                    <select id="allColumnsSelect" onchange="addColumn(this.value)">
+                        <option value="">+ Add Column</option>
+                        <option value="first_name">First Name</option>
+                        <option value="last_name">Last Name</option>
+                        <option value="phone_number">Phone Number</option>
+                        <option value="email">Email</option>
+                        <option value="city">City</option>
+                        <option value="state">State</option>
+                        <option value="zip">ZIP</option>
+                        <option value="address1">Ethnic</option>
+                        <option value="address2">Gender</option>
+                        <option value="address3">Age</option>
+                        <option value="owner">Cell (Y/N)</option>
+                        <option value="vendor_lead_code">Record ID</option>
+                    </select>
+                    <div class="column-chips" id="selectedColumns"></div>
+                </div>
+
+                <!-- Condition Builder -->
+                <div class="condition-builder">
+                    <label>Add Filtering Conditions</label>
+                    <div id="conditionsContainer"></div>
+                    <button class="btn-secondary" onclick="addCondition()" style="margin-top: 15px;">+ Add Condition</button>
+                </div>
+
+                <!-- Button Group -->
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="resetQuery()">🔄 Reset</button>
+                    <button class="btn-primary" onclick="generateQuery()">⚡ Generate Query</button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Preview & Results -->
+            <div class="panel">
+                <h2>📤 Query Output</h2>
+
+                <!-- Query Preview -->
+                <div style="margin-bottom: 20px;">
+                    <label style="margin-bottom: 10px;">Generated Query</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <button class="btn-copy btn-icon" onclick="copyQuery()" title="Copy to Clipboard">
+                            📋
+                        </button>
+                        <button class="btn-secondary" onclick="executeQuery()" style="flex: 1;">► Execute</button>
+                    </div>
+                    <div class="query-preview empty" id="queryOutput">
+                        Your query will appear here...
+                    </div>
+                </div>
+
+                <!-- Execution Results -->
+                <div style="margin-top: 20px;">
+                    <label>Results Preview</label>
+                    <div id="resultsContainer" style="
+                        background: rgba(255, 255, 255, 0.02);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 8px;
+                        padding: 15px;
+                        font-size: 12px;
+                        color: #b0b0b0;
+                        min-height: 200px;
+                    ">
+                        Results will appear after executing the query...
+                    </div>
+                </div>
+
+                <!-- Save Query -->
+                <div style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Save This Query</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="queryName" placeholder="Query name..." style="flex: 1;">
+                            <button class="btn-primary" onclick="saveQuery()" style="flex: 0;">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Queries -->
+                <div class="saved-queries" id="savedQueriesContainer" style="display: none;">
+                    <label style="display: block; margin-bottom: 10px;">📚 My Saved Queries</label>
+                    <div id="savedQueriesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/query-builder-ui.js"></script>
+</body>
+</html>

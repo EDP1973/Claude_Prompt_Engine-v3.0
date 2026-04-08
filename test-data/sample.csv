@@ -1,0 +1,11 @@
+first_name,last_name,phone,city,state,zip,ethnic,gender,age,political_party
+John,Smith,5551234567,New York,NY,10001,Caucasian,M,35,Republican
+Jane,Doe,5559876543,Los Angeles,CA,90001,African American,F,28,Democrat
+Robert,Johnson,5552223333,Chicago,IL,60601,Hispanic,M,42,Independent
+Sarah,Williams,5554445555,Houston,TX,77001,Asian,F,31,Democrat
+Michael,Brown,5555556666,Phoenix,AZ,85001,Native American,M,55,Republican
+Emily,Davis,5556667777,Philadelphia,PA,19101,Caucasian,F,26,Democrat
+David,Miller,5557778888,San Antonio,TX,78201,Hispanic,M,48,Republican
+Lisa,Wilson,5558889999,San Diego,CA,92101,African American,F,34,Independent
+James,Moore,5559990000,Dallas,TX,75201,Caucasian,M,39,Democrat
+Jennifer,Taylor,5550001111,San Jose,CA,95101,Asian,F,29,Republican

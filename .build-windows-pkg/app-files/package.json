@@ -1,0 +1,15 @@
+{
+  "name": "claude-prompt-engine",
+  "version": "1.1.0",
+  "bin": {
+    "cpe": "./index.js"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "web": "node server.js",
+    "cli": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.14.0"
+  }
+}
