@@ -13,6 +13,7 @@ const VicidialMapper = require("./core/vicidial-mapper");
 const DataImporter = require("./core/data-importer");
 const DataValidator = require("./core/data-validator");
 const QueryBuilder = require("./core/query-builder");
+const AdvancedMySQLQueryGenerator = require("./core/advanced-query-generator");
 const ApiHandlers = require("./core/api-handlers");
 
 const PORT = process.env.PORT || 3000;

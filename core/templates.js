@@ -156,7 +156,6 @@ ${context ? `\nCONTEXT:\n${context}` : ""}
       constraints,
       model,
       purpose
-    })
     }),
 
   // Database & SQL Templates
