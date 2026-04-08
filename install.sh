@@ -199,9 +199,9 @@ test_installation() {
     
     # Test npm
     if npm -v &> /dev/null; then
-        print_status "npm test passed"
+        print_status "npm $(npm -v) verified"
     else
-        print_error "npm test failed"
+        print_error "npm verification failed"
         exit 1
     fi
     
@@ -277,9 +277,8 @@ show_instructions() {
     echo -e "${GREEN}Useful Commands:${NC}"
     echo ""
     echo "  npm run web        - Start development server"
-    echo "  npm test           - Run test suite"
-    echo "  npm run build      - Build for production"
-    echo "  bash run-tests.sh  - Quick test check"
+    echo "  npm run cli        - Run CLI interface"
+    echo "  bash run-tests.sh  - Run comprehensive test suite"
     echo ""
     echo -e "${GREEN}First Steps:${NC}"
     echo ""
