@@ -1,43 +1,50 @@
 {
   "name": "claude-prompt-engine",
-  "version": "1.2.0",
+  "version": "4.0.0",
+  "description": "Claude Prompt Engine v4.0 iAI — Intelligent AI assistant, data import, query builder, and Vicidial telephony integration platform",
   "bin": {
     "cpe": "./index.js"
   },
   "type": "commonjs",
   "scripts": {
     "web": "node server.js",
-    "cli": "node index.js",
     "start": "node server.js",
+    "cli": "node index.js",
     "setup": "bash setup-keys.sh",
     "setup:win": "powershell -ExecutionPolicy Bypass -File setup-keys.ps1",
+    "install:linux": "bash install.sh",
+    "install:mac": "bash installers/install-macos.sh",
+    "install:win": "powershell -ExecutionPolicy Bypass -File installers/install.ps1",
     "test": "node test-suite.js",
     "stop": "node -e \"const {execSync}=require('child_process');try{execSync('fuser -k 3000/tcp')}catch(e){}\""
   },
   "dependencies": {
-    "xlsx": "^0.18.5",
     "csv-parse": "^5.4.1",
+    "express": "^4.18.2",
+    "sqlite3": "^6.0.1",
     "validator": "^13.11.0",
-    "sqlite3": "^5.1.6",
-    "express": "^4.18.2"
+    "xlsx": "^0.18.5"
   },
-  "description": "Intelligent AI assistant, data import, query builder, and Vicidial integration platform",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
   "keywords": [
     "ai",
+    "iai",
     "prompt-engine",
     "vicidial",
     "data-import",
     "query-builder",
     "copilot",
-    "iai"
+    "openai",
+    "telephony",
+    "sip"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/EDP1973/Claude_Prompt_Engine-v3.0"
   },
+  "author": "EDP1973",
   "license": "MIT"
 }

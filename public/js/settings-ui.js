@@ -568,3 +568,180 @@ function resetDefaults() {
 document.addEventListener('DOMContentLoaded', () => {
   window.settingsManager = new SettingsManager();
 });
+
+// ── iAI Settings Functions ──────────────────────────────────────────────────
+
+const IAI_KEYS = {
+  openaiKey:    'iai_openai_key',
+  githubToken:  'iai_github_token',
+  iaiModel:     'iai_model',
+  ttsEngine:    'iai_tts_engine',
+  ttsVoice:     'iai_tts_voice',
+  ttsModel:     'iai_tts_model',
+  sttLang:      'iai_stt_lang',
+  autoSpeak:    'iai_auto_speak',
+  iaiContext:   'iai_context',
+  iaiMaxTokens: 'iai_max_tokens',
+  iaiMemory:    'iai_memory_enabled',
+  iaiWebBrowse: 'iai_web_browse'
+};
+
+function loadIaiSettings() {
+  const get = id => document.getElementById(id);
+  const stored = key => localStorage.getItem(key);
+  if (get('openaiKey'))         get('openaiKey').value           = stored(IAI_KEYS.openaiKey) || '';
+  if (get('githubToken'))       get('githubToken').value          = stored(IAI_KEYS.githubToken) || '';
+  if (get('iaiModel'))          get('iaiModel').value             = stored(IAI_KEYS.iaiModel) || 'gpt-4o-mini';
+  if (get('ttsEngine'))         get('ttsEngine').value            = stored(IAI_KEYS.ttsEngine) || 'openai';
+  if (get('ttsVoice'))          get('ttsVoice').value             = stored(IAI_KEYS.ttsVoice) || 'nova';
+  if (get('ttsModel'))          get('ttsModel').value             = stored(IAI_KEYS.ttsModel) || 'tts-1';
+  if (get('sttLang'))           get('sttLang').value              = stored(IAI_KEYS.sttLang) || 'en-US';
+  if (get('autoSpeak'))         get('autoSpeak').checked          = stored(IAI_KEYS.autoSpeak) === 'true';
+  if (get('iaiContext'))        get('iaiContext').value            = stored(IAI_KEYS.iaiContext) || 'general';
+  if (get('iaiMaxTokens'))      get('iaiMaxTokens').value         = stored(IAI_KEYS.iaiMaxTokens) || '2048';
+  if (get('iaiMemoryEnabled'))  get('iaiMemoryEnabled').checked   = stored(IAI_KEYS.iaiMemory) !== 'false';
+  if (get('iaiWebBrowse'))      get('iaiWebBrowse').checked       = stored(IAI_KEYS.iaiWebBrowse) === 'true';
+  updateTtsOptions();
+}
+
+function saveIaiKeys() {
+  const get = id => document.getElementById(id);
+  if (get('openaiKey') && get('openaiKey').value)   localStorage.setItem(IAI_KEYS.openaiKey, get('openaiKey').value);
+  if (get('githubToken') && get('githubToken').value) localStorage.setItem(IAI_KEYS.githubToken, get('githubToken').value);
+  if (get('iaiModel')) localStorage.setItem(IAI_KEYS.iaiModel, get('iaiModel').value);
+  showSettingsToast('API keys saved');
+}
+
+function saveVoiceSettings() {
+  const get = id => document.getElementById(id);
+  if (get('ttsEngine'))  localStorage.setItem(IAI_KEYS.ttsEngine,  get('ttsEngine').value);
+  if (get('ttsVoice'))   localStorage.setItem(IAI_KEYS.ttsVoice,   get('ttsVoice').value);
+  if (get('ttsModel'))   localStorage.setItem(IAI_KEYS.ttsModel,   get('ttsModel').value);
+  if (get('sttLang'))    localStorage.setItem(IAI_KEYS.sttLang,    get('sttLang').value);
+  if (get('autoSpeak'))  localStorage.setItem(IAI_KEYS.autoSpeak,  get('autoSpeak').checked);
+  showSettingsToast('Voice settings saved');
+}
+
+function saveIaiBehaviour() {
+  const get = id => document.getElementById(id);
+  if (get('iaiContext'))        localStorage.setItem(IAI_KEYS.iaiContext,   get('iaiContext').value);
+  if (get('iaiMaxTokens'))      localStorage.setItem(IAI_KEYS.iaiMaxTokens, get('iaiMaxTokens').value);
+  if (get('iaiMemoryEnabled'))  localStorage.setItem(IAI_KEYS.iaiMemory,    get('iaiMemoryEnabled').checked);
+  if (get('iaiWebBrowse'))      localStorage.setItem(IAI_KEYS.iaiWebBrowse, get('iaiWebBrowse').checked);
+  showSettingsToast('Behaviour settings saved');
+}
+
+function updateTtsOptions() {
+  const get = id => document.getElementById(id);
+  const isOpenAI = !get('ttsEngine') || get('ttsEngine').value === 'openai';
+  if (get('openaiVoiceSection'))    get('openaiVoiceSection').style.display    = isOpenAI ? '' : 'none';
+  if (get('openaiTtsModelSection')) get('openaiTtsModelSection').style.display = isOpenAI ? '' : 'none';
+}
+
+async function checkIaiStatus() {
+  const get = id => document.getElementById(id);
+  const el = get('iaiStatus'), diag = get('iaiDiag');
+  if (el) el.textContent = 'Checking...';
+  try {
+    const r = await fetch('/api/iai/status');
+    const d = await r.json();
+    if (el) {
+      const ok = d.apiAvailable || d.cliAvailable;
+      el.innerHTML = '<span style="color:' + (ok ? '#4caf50' : '#ff6b6b') + '">' + (ok ? 'Online' : 'Offline') + '</span>'
+        + ' | Engine: <strong>' + (d.activeEngine || 'None') + '</strong>'
+        + ' | Models: ' + ((d.models || []).join(', ') || 'N/A');
+    }
+    if (diag) diag.textContent = JSON.stringify(d, null, 2);
+  } catch(e) {
+    if (el) el.innerHTML = '<span style="color:#ff6b6b">Error: ' + e.message + '</span>';
+    if (diag) diag.textContent = 'Error: ' + e.message;
+  }
+}
+
+async function testIaiConnection() {
+  showSettingsToast('Testing iAI connection...');
+  try {
+    const r = await fetch('/api/iai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Reply with only: iAI connected OK', mode: 'general' })
+    });
+    const d = await r.json();
+    if (d.text) showSettingsToast('iAI: ' + d.text.slice(0, 60));
+    else showSettingsToast('iAI test failed: ' + (d.error || 'No response'));
+  } catch(e) {
+    showSettingsToast('Connection error: ' + e.message);
+  }
+}
+
+async function testVoice() {
+  const get = id => document.getElementById(id);
+  const engine = get('ttsEngine') ? get('ttsEngine').value : 'browser';
+  if (engine === 'openai') {
+    try {
+      const voice = get('ttsVoice') ? get('ttsVoice').value : 'nova';
+      const r = await fetch('/api/iai/tts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: 'iAI voice is working.', voice: voice })
+      });
+      if (r.ok) {
+        const blob = await r.blob();
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.play();
+        showSettingsToast('OpenAI TTS playing...');
+      } else {
+        const err = await r.json().catch(() => ({}));
+        showSettingsToast('TTS error: ' + (err.error || r.status));
+      }
+    } catch(e) { showSettingsToast('TTS error: ' + e.message); }
+  } else {
+    if ('speechSynthesis' in window) {
+      const utt = new SpeechSynthesisUtterance('iAI voice is working.');
+      utt.lang = get('sttLang') ? get('sttLang').value : 'en-US';
+      speechSynthesis.speak(utt);
+      showSettingsToast('Browser TTS playing...');
+    } else {
+      showSettingsToast('Browser TTS not supported');
+    }
+  }
+}
+
+function viewIaiMemory() {
+  window.open('/iai.html', '_blank');
+}
+
+async function clearIaiMemory() {
+  if (!confirm('Clear all iAI memory? This cannot be undone.')) return;
+  showSettingsToast('Clearing memory...');
+  try {
+    const r = await fetch('/api/iai/memory/remember', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'clear' })
+    });
+    showSettingsToast(r.ok ? 'Memory cleared' : 'Failed to clear memory');
+  } catch(e) { showSettingsToast('Error: ' + e.message); }
+}
+
+function showSettingsToast(msg) {
+  let t = document.getElementById('settingsToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'settingsToast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1a1a2e;border:1px solid #00d4ff;color:#fff;padding:12px 20px;border-radius:8px;font-size:0.9em;z-index:9999;opacity:0;transition:opacity 0.3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.style.opacity = '0'; }, 3000);
+}
+
+// Load iAI settings and bind tab click handler
+document.addEventListener('DOMContentLoaded', function() {
+  loadIaiSettings();
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (btn.textContent.indexOf('iAI') !== -1) checkIaiStatus();
+    });
+  });
+});

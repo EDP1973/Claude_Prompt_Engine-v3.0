@@ -1,0 +1,139 @@
+{
+  "total": 33,
+  "passed": 33,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Install Config module loads",
+      "passed": true
+    },
+    {
+      "name": "Vicidial Mapper module loads",
+      "passed": true
+    },
+    {
+      "name": "Data Importer module loads",
+      "passed": true
+    },
+    {
+      "name": "Data Validator module loads",
+      "passed": true
+    },
+    {
+      "name": "Query Builder module loads",
+      "passed": true
+    },
+    {
+      "name": "Hardware tier detection",
+      "passed": true
+    },
+    {
+      "name": "LLM limits retrieval",
+      "passed": true
+    },
+    {
+      "name": "Levenshtein distance calculation",
+      "passed": true
+    },
+    {
+      "name": "Field mapping suggestions",
+      "passed": true
+    },
+    {
+      "name": "CSV parsing",
+      "passed": true
+    },
+    {
+      "name": "CSV column detection",
+      "passed": true
+    },
+    {
+      "name": "Phone validation (10 digits)",
+      "passed": true
+    },
+    {
+      "name": "Phone validation (11 digits)",
+      "passed": true
+    },
+    {
+      "name": "Phone rejection (invalid)",
+      "passed": true
+    },
+    {
+      "name": "Data validation report generation",
+      "passed": true
+    },
+    {
+      "name": "Query generation from conditions",
+      "passed": true
+    },
+    {
+      "name": "SQL injection prevention",
+      "passed": true
+    },
+    {
+      "name": "BETWEEN operator support",
+      "passed": true
+    },
+    {
+      "name": "File write operation",
+      "passed": true
+    },
+    {
+      "name": "File read operation",
+      "passed": true
+    },
+    {
+      "name": "API Handlers module loads",
+      "passed": true
+    },
+    {
+      "name": "Server.js file exists",
+      "passed": true
+    },
+    {
+      "name": "Server has database initialization",
+      "passed": true
+    },
+    {
+      "name": "Server has API endpoints",
+      "passed": true
+    },
+    {
+      "name": "Server has error handling",
+      "passed": true
+    },
+    {
+      "name": "Data import UI exists",
+      "passed": true
+    },
+    {
+      "name": "Query builder form UI exists",
+      "passed": true
+    },
+    {
+      "name": "Query builder visual UI exists",
+      "passed": true
+    },
+    {
+      "name": "Settings UI exists",
+      "passed": true
+    },
+    {
+      "name": "Data import controller exists",
+      "passed": true
+    },
+    {
+      "name": "Query builder controller exists",
+      "passed": true
+    },
+    {
+      "name": "Visual builder controller exists",
+      "passed": true
+    },
+    {
+      "name": "Settings controller exists",
+      "passed": true
+    }
+  ]
+}

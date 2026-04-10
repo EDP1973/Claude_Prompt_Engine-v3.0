@@ -11,7 +11,7 @@ const assert = require('assert');
 
 // Test configuration
 const TEST_DIR = __dirname;
-const CORE_DIR = path.join(__dirname, '..', 'core');
+const CORE_DIR = path.join(__dirname, 'core');
 const RESULTS = {
   total: 0,
   passed: 0,
@@ -53,36 +53,36 @@ async function runTests() {
   // Test 1: Module Loading
   log('blue', '📦 MODULE LOADING TESTS');
   try {
-    const installConfig = require(path.join(CORE_DIR, 'install-config.js'));
-    testResult('Install Config module loads', installConfig && typeof installConfig.detectHardwareTier === 'function');
+    const InstallConfig = require(path.join(CORE_DIR, 'install-config.js'));
+    testResult('Install Config module loads', typeof InstallConfig === 'function' && typeof new InstallConfig().detectHardwareTier === 'function');
   } catch (e) {
     testResult('Install Config module loads', false, e);
   }
 
   try {
-    const vicidialMapper = require(path.join(CORE_DIR, 'vicidial-mapper.js'));
-    testResult('Vicidial Mapper module loads', vicidialMapper && typeof vicidialMapper.suggestFieldMapping === 'function');
+    const VicidialMapper = require(path.join(CORE_DIR, 'vicidial-mapper.js'));
+    testResult('Vicidial Mapper module loads', typeof VicidialMapper === 'function' && typeof new VicidialMapper().suggestFieldMapping === 'function');
   } catch (e) {
     testResult('Vicidial Mapper module loads', false, e);
   }
 
   try {
-    const dataImporter = require(path.join(CORE_DIR, 'data-importer.js'));
-    testResult('Data Importer module loads', dataImporter && typeof dataImporter.parseCSV === 'function');
+    const DataImporter = require(path.join(CORE_DIR, 'data-importer.js'));
+    testResult('Data Importer module loads', typeof DataImporter === 'function' && typeof new DataImporter().importCSV === 'function');
   } catch (e) {
     testResult('Data Importer module loads', false, e);
   }
 
   try {
-    const dataValidator = require(path.join(CORE_DIR, 'data-validator.js'));
-    testResult('Data Validator module loads', dataValidator && typeof dataValidator.validate === 'function');
+    const DataValidator = require(path.join(CORE_DIR, 'data-validator.js'));
+    testResult('Data Validator module loads', typeof DataValidator === 'function' && typeof new DataValidator().validate === 'function');
   } catch (e) {
     testResult('Data Validator module loads', false, e);
   }
 
   try {
-    const queryBuilder = require(path.join(CORE_DIR, 'query-builder.js'));
-    testResult('Query Builder module loads', queryBuilder && typeof queryBuilder.generateQuery === 'function');
+    const QueryBuilder = require(path.join(CORE_DIR, 'query-builder.js'));
+    testResult('Query Builder module loads', typeof QueryBuilder === 'function' && typeof new QueryBuilder().generateQuery === 'function');
   } catch (e) {
     testResult('Query Builder module loads', false, e);
   }
@@ -90,11 +90,13 @@ async function runTests() {
   // Test 2: Hardware Detection
   log('blue', '\n🖥️  HARDWARE DETECTION TESTS');
   try {
-    const installConfig = require(path.join(CORE_DIR, 'install-config.js'));
-    const tier = installConfig.detectHardwareTier();
-    testResult('Hardware tier detection', ['basic', 'standard', 'premium'].includes(tier));
-    const limits = installConfig.getLLMLimits(tier);
-    testResult('LLM limits retrieval', limits && limits.tokenLimit > 0);
+    const InstallConfig = require(path.join(CORE_DIR, 'install-config.js'));
+    const installConfig = new InstallConfig();
+    const result = installConfig.detectHardwareTier();
+    const tierName = result.detectedTier || result;
+    testResult('Hardware tier detection', ['basic', 'standard', 'premium'].includes(tierName));
+    const limits = installConfig.getLLMLimits(tierName);
+    testResult('LLM limits retrieval', limits && (limits.tokenLimit > 0 || limits.maxTokens > 0));
   } catch (e) {
     testResult('Hardware Detection', false, e);
   }
@@ -102,14 +104,15 @@ async function runTests() {
   // Test 3: Vicidial Mapping
   log('blue', '\n🗺️  VICIDIAL MAPPING TESTS');
   try {
-    const mapper = require(path.join(CORE_DIR, 'vicidial-mapper.js'));
-    
+    const VicidialMapper = require(path.join(CORE_DIR, 'vicidial-mapper.js'));
+    const mapper = new VicidialMapper();
+
     // Test Levenshtein distance
     const distance = mapper.levenshteinDistance('first_name', 'fname');
     testResult('Levenshtein distance calculation', distance >= 0 && distance <= 10);
 
-    // Test field mapping
-    const suggestions = mapper.suggestMappings({ fname: 'John', lname: 'Doe', phone: '5551234567' });
+    // Test field mapping - pass array of column names
+    const suggestions = mapper.suggestMappings(['fname', 'lname', 'phone']);
     testResult('Field mapping suggestions', Array.isArray(suggestions) && suggestions.length > 0);
 
   } catch (e) {
@@ -119,17 +122,21 @@ async function runTests() {
   // Test 4: Data Import
   log('blue', '\n📥 DATA IMPORT TESTS');
   try {
-    const importer = require(path.join(CORE_DIR, 'data-importer.js'));
+    const DataImporter = require(path.join(CORE_DIR, 'data-importer.js'));
+    const importer = new DataImporter();
 
-    // Test CSV parsing
-    const csvPath = path.join(__dirname, '..', 'test-data', 'sample.csv');
+    // Test CSV parsing - importCSV takes a file path
+    const csvPath = path.join(__dirname, 'test-data', 'sample.csv');
     if (fs.existsSync(csvPath)) {
-      const csvData = require('fs').readFileSync(csvPath, 'utf-8');
-      const result = importer.parseCSV(csvData);
-      testResult('CSV parsing', Array.isArray(result.rows) && result.rows.length > 0);
-      testResult('CSV column detection', Array.isArray(result.columns) && result.columns.length > 0);
+      importer.importCSV(csvPath);
+      const data = importer.getData();
+      const rows = data.rows;
+      const cols = importer.getColumns();
+      testResult('CSV parsing', Array.isArray(rows) && rows.length > 0);
+      testResult('CSV column detection', Array.isArray(cols) && cols.length > 0);
     } else {
       testResult('CSV parsing', false, new Error('Sample CSV not found'));
+      testResult('CSV column detection', false, new Error('Sample CSV not found'));
     }
 
   } catch (e) {
@@ -139,7 +146,8 @@ async function runTests() {
   // Test 5: Data Validation
   log('blue', '\n✓ DATA VALIDATION TESTS');
   try {
-    const validator = require(path.join(CORE_DIR, 'data-validator.js'));
+    const DataValidator = require(path.join(CORE_DIR, 'data-validator.js'));
+    const validator = new DataValidator();
 
     // Test phone validation
     testResult('Phone validation (10 digits)', validator.isDialable('5551234567'));
@@ -151,8 +159,9 @@ async function runTests() {
       { first_name: 'John', last_name: 'Smith', phone: '5551234567' },
       { first_name: 'Jane', last_name: 'Doe', phone: '5559876543' }
     ];
-    const validation = validator.validate(testData);
-    testResult('Data validation report generation', validation && validation.valid !== undefined);
+    validator.validate(testData);
+    const report = validator.generateReport();
+    testResult('Data validation report generation', report && report.overallValid !== undefined);
 
   } catch (e) {
     testResult('Data Validation', false, e);
@@ -161,23 +170,20 @@ async function runTests() {
   // Test 6: Query Building
   log('blue', '\n⚙️  QUERY BUILDER TESTS');
   try {
-    const builder = require(path.join(CORE_DIR, 'query-builder.js'));
+    const QueryBuilder = require(path.join(CORE_DIR, 'query-builder.js'));
+    const builder = new QueryBuilder();
 
-    // Test query generation
-    const conditions = [
-      { field: 'first_name', operator: '=', value: 'John', logical: 'AND' },
-      { field: 'age', operator: '>', value: '30', logical: 'AND' }
-    ];
-
-    const query = builder.generateQuery(conditions, 'users');
+    // addCondition then generateQuery(tableName)
+    builder.addCondition('first_name', '=', 'John');
+    builder.addCondition('age', '>', '30');
+    const query = builder.generateQuery('users');
     testResult('Query generation from conditions', query && query.includes('WHERE'));
     testResult('SQL injection prevention', !query.includes('DROP') && !query.includes('DELETE'));
 
-    // Test different operators
-    const betweenQuery = builder.generateQuery(
-      [{ field: 'age', operator: 'BETWEEN', value: '20,40', logical: 'AND' }],
-      'users'
-    );
+    // Test BETWEEN operator - value must be an array [min, max]
+    const builder2 = new QueryBuilder();
+    builder2.addCondition('age', 'BETWEEN', [20, 40]);
+    const betweenQuery = builder2.generateQuery('users');
     testResult('BETWEEN operator support', betweenQuery && betweenQuery.includes('BETWEEN'));
 
   } catch (e) {
@@ -187,7 +193,7 @@ async function runTests() {
   // Test 7: File I/O
   log('blue', '\n💾 FILE I/O TESTS');
   try {
-    const testFile = path.join(__dirname, '..', 'test-data', 'test-write.json');
+    const testFile = path.join(__dirname, 'test-data', 'test-write.json');
     fs.writeFileSync(testFile, JSON.stringify({ test: 'data' }));
     testResult('File write operation', fs.existsSync(testFile));
     
@@ -202,8 +208,9 @@ async function runTests() {
   // Test 8: API Handlers (if available)
   log('blue', '\n🔌 API HANDLERS TESTS');
   try {
-    const apiHandlers = require(path.join(CORE_DIR, 'api-handlers.js'));
-    testResult('API Handlers module loads', apiHandlers && typeof apiHandlers.validateImportedData === 'function');
+    const ApiHandlers = require(path.join(CORE_DIR, 'api-handlers.js'));
+    const apiHandlers = new ApiHandlers();
+    testResult('API Handlers module loads', typeof apiHandlers.validateImportedData === 'function');
   } catch (e) {
     testResult('API Handlers', false, e);
   }
@@ -211,12 +218,12 @@ async function runTests() {
   // Test 9: Server Components
   log('blue', '\n🖧 SERVER COMPONENT TESTS');
   try {
-    const serverPath = path.join(__dirname, '..', 'server.js');
+    const serverPath = path.join(__dirname, 'server.js');
     testResult('Server.js file exists', fs.existsSync(serverPath));
     
     const serverContent = fs.readFileSync(serverPath, 'utf-8');
     testResult('Server has database initialization', serverContent.includes('initializeDatabase'));
-    testResult('Server has API endpoints', serverContent.includes('app.post') || serverContent.includes('app.get'));
+    testResult('Server has API endpoints', serverContent.includes('/api/'));
     testResult('Server has error handling', serverContent.includes('catch'));
 
   } catch (e) {
@@ -226,7 +233,7 @@ async function runTests() {
   // Test 10: UI Components
   log('blue', '\n🎨 UI COMPONENT TESTS');
   try {
-    const publicDir = path.join(__dirname, '..', 'public');
+    const publicDir = path.join(__dirname, 'public');
     testResult('Data import UI exists', fs.existsSync(path.join(publicDir, 'data-import.html')));
     testResult('Query builder form UI exists', fs.existsSync(path.join(publicDir, 'query-builder-form.html')));
     testResult('Query builder visual UI exists', fs.existsSync(path.join(publicDir, 'query-builder-visual.html')));
@@ -252,7 +259,7 @@ async function runTests() {
     `Total Tests: ${RESULTS.total} | Passed: ${RESULTS.passed} | Failed: ${RESULTS.failed} | Pass Rate: ${passRate}%`);
 
   // Write results to file
-  const resultsFile = path.join(__dirname, '..', 'TEST_RESULTS.json');
+  const resultsFile = path.join(__dirname, 'TEST_RESULTS.json');
   fs.writeFileSync(resultsFile, JSON.stringify(RESULTS, null, 2));
   log('blue', `\n✓ Results saved to TEST_RESULTS.json`);
 

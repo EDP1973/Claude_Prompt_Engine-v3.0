@@ -433,6 +433,7 @@
 
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('deployment')">Deployment</button>
+            <button class="tab-btn" onclick="switchTab('iai')">🤖 iAI</button>
             <button class="tab-btn" onclick="switchTab('hardware')">Hardware</button>
             <button class="tab-btn" onclick="switchTab('advanced')">Advanced</button>
         </div>
@@ -590,6 +591,170 @@
             </div>
         </div>
 
+        <!-- iAI Tab -->
+        <div id="iai" class="tab-content settings-grid">
+            <div class="setting-card">
+                <h2><span class="icon">🤖</span> iAI — AI Engine</h2>
+
+                <div class="setting-section">
+                    <label class="setting-label">Engine Status</label>
+                    <div id="iaiStatus" style="font-size:0.9em;color:#888;padding:8px 0;">Loading…</div>
+                    <button class="btn btn-secondary" onclick="checkIaiStatus()" style="margin-top:8px;">🔄 Refresh Status</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="setting-section">
+                    <label class="setting-label">OpenAI API Key <span class="required">*</span></label>
+                    <input type="password" id="openaiKey" class="form-control" placeholder="sk-…">
+                    <div class="info-box">ℹ️ Required for GPT models and OpenAI TTS voice output</div>
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">GitHub Copilot Token</label>
+                    <input type="password" id="githubToken" class="form-control" placeholder="ghu_… or ghp_…">
+                    <div class="info-box">ℹ️ Fallback engine when OpenAI key is not set. Run <code>gh auth login</code> to authenticate.</div>
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">Default AI Model</label>
+                    <select id="iaiModel" class="form-control">
+                        <option value="gpt-4o-mini">GPT-4o mini (fast, cheap)</option>
+                        <option value="gpt-4o">GPT-4o (best quality)</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo (fastest)</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="saveIaiKeys()">💾 Save API Keys</button>
+                    <button class="btn btn-secondary" onclick="testIaiConnection()">🧪 Test Connection</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h2><span class="icon">🔊</span> Voice Settings</h2>
+
+                <div class="setting-section">
+                    <label class="setting-label">Text-to-Speech Engine</label>
+                    <select id="ttsEngine" class="form-control" onchange="updateTtsOptions()">
+                        <option value="openai">OpenAI TTS (requires API key)</option>
+                        <option value="browser">Browser TTS (free, built-in)</option>
+                    </select>
+                </div>
+
+                <div class="setting-section" id="openaiVoiceSection">
+                    <label class="setting-label">OpenAI Voice</label>
+                    <select id="ttsVoice" class="form-control">
+                        <option value="nova">Nova (female, warm)</option>
+                        <option value="alloy">Alloy (neutral)</option>
+                        <option value="echo">Echo (male, deep)</option>
+                        <option value="fable">Fable (expressive)</option>
+                        <option value="onyx">Onyx (male, authoritative)</option>
+                        <option value="shimmer">Shimmer (female, gentle)</option>
+                    </select>
+                </div>
+
+                <div class="setting-section" id="openaiTtsModelSection">
+                    <label class="setting-label">TTS Model</label>
+                    <select id="ttsModel" class="form-control">
+                        <option value="tts-1">tts-1 (standard, faster)</option>
+                        <option value="tts-1-hd">tts-1-hd (high quality)</option>
+                    </select>
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">Speech Recognition Language</label>
+                    <select id="sttLang" class="form-control">
+                        <option value="en-US">English (US)</option>
+                        <option value="en-GB">English (UK)</option>
+                        <option value="es-ES">Spanish</option>
+                        <option value="fr-FR">French</option>
+                        <option value="de-DE">German</option>
+                        <option value="pt-BR">Portuguese (Brazil)</option>
+                        <option value="it-IT">Italian</option>
+                        <option value="ja-JP">Japanese</option>
+                        <option value="zh-CN">Chinese (Mandarin)</option>
+                    </select>
+                    <div class="info-box">ℹ️ Uses browser Web Speech API for microphone input</div>
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">Auto-Speak Responses</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="autoSpeak">
+                            <label for="autoSpeak">Automatically read iAI responses aloud</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="testVoice()">🔊 Test Voice</button>
+                    <button class="btn btn-primary" onclick="saveVoiceSettings()">💾 Save Voice</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h2><span class="icon">🧠</span> iAI Memory & Behaviour</h2>
+
+                <div class="setting-section">
+                    <label class="setting-label">System Context</label>
+                    <select id="iaiContext" class="form-control">
+                        <option value="general">General Assistant</option>
+                        <option value="prompt">Prompt Engineer</option>
+                        <option value="data">Data & SQL Expert</option>
+                    </select>
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">Max Response Tokens</label>
+                    <input type="number" id="iaiMaxTokens" class="form-control" value="2048" min="256" max="8192" step="256">
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">Memory Options</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="iaiMemoryEnabled" checked>
+                            <label for="iaiMemoryEnabled">Enable episodic memory (remember conversations)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="iaiWebBrowse">
+                            <label for="iaiWebBrowse">Allow iAI to browse the web for answers</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <label class="setting-label">Memory Actions</label>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-secondary" onclick="viewIaiMemory()">🧠 View Memory</button>
+                        <button class="btn btn-danger" onclick="clearIaiMemory()">🗑️ Clear Memory</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="saveIaiBehaviour()">💾 Save Behaviour</button>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <h2><span class="icon">🔗</span> Quick Links</h2>
+                <div class="setting-section">
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <a href="/iai.html" style="color:#00d4ff;text-decoration:none;font-size:0.95em;">🤖 Open iAI Chat →</a>
+                        <a href="/" style="color:#00d4ff;text-decoration:none;font-size:0.9em;">← Back to Home</a>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="setting-section">
+                    <label class="setting-label">iAI Diagnostics</label>
+                    <div id="iaiDiag" style="font-size:0.85em;color:#888;font-family:monospace;white-space:pre-wrap;max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;">Run status check to see diagnostics…</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Advanced Tab -->
         <div id="advanced" class="tab-content settings-grid">
             <div class="setting-card">
@@ -695,7 +860,7 @@
                 <div class="setting-section">
                     <label class="setting-label">Version Information</label>
                     <div style="font-size: 0.9em; color: #888; line-height: 1.8;">
-                        <p><strong>Engine Version:</strong> 1.0.0</p>
+                        <p><strong>Engine Version:</strong> 4.0.0</p>
                         <p><strong>Build Date:</strong> <span id="buildDate">2026-04-08</span></p>
                         <p><strong>Node.js Version:</strong> <span id="nodeVersion">v18+</span></p>
                     </div>
@@ -707,6 +872,7 @@
                     <label class="setting-label">Links & Resources</label>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <a href="/" style="color: #00d4ff; text-decoration: none; font-size: 0.9em;">← Back to Home</a>
+                        <a href="/iai.html" style="color: #00d4ff; text-decoration: none; font-size: 0.9em;">→ iAI Assistant</a>
                         <a href="/data-import.html" style="color: #00d4ff; text-decoration: none; font-size: 0.9em;">→ Data Import Wizard</a>
                         <a href="/query-builder-form.html" style="color: #00d4ff; text-decoration: none; font-size: 0.9em;">→ Query Builder</a>
                     </div>

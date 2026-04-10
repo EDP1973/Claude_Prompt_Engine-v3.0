@@ -6,7 +6,7 @@
 const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
-const csv = require('csv-parse/sync');
+const { parse: csv } = require('csv-parse/sync');
 
 class DataImporter {
   constructor() {
