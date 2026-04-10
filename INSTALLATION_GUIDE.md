@@ -22,6 +22,41 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ---
 
+## 🤖 iAI Setup (Optional but Recommended)
+
+iAI is the built-in intelligent assistant. It works best with a GitHub token:
+
+### 1. Get a GitHub Personal Access Token
+1. Visit [github.com/settings/tokens](https://github.com/settings/tokens)
+2. Create a **Fine-grained token** or **Classic token**
+3. Enable the **"Copilot Requests"** scope (or `read:enterprise` for classic)
+
+### 2. Set Environment Variables
+
+**Linux / macOS:**
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+export GH_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+export OPENAI_API_KEY=sk-xxxx    # optional — enables TTS voice output
+```
+
+**Or use the `.env` file (created by the installer):**
+```
+GH_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+OPENAI_API_KEY=sk-xxxx
+```
+
+### 3. Verify iAI is Working
+```bash
+npm run web
+# Visit http://localhost:3000/iai.html
+# The engine badge should show "● GitHub Copilot API"
+```
+
+iAI works **without a token** too — it falls back to `gh copilot suggest` if `gh` CLI is authenticated.
+
+---
+
 ## 📋 System Requirements
 
 | OS | Node.js | npm | Git |

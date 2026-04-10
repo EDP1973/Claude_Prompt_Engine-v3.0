@@ -991,10 +991,22 @@ async function startServer() {
     
     // Start server
     server.listen(PORT, () => {
-      console.log(`\n✨ Claude Prompt Engine - Phase 3 Server Ready\n`);
-      console.log(`🌐 Server running at: http://localhost:${PORT}`);
+      console.log(`\n✨ Claude Prompt Engine v${require('./package.json').version}\n`);
+      console.log(`🌐 Server:   http://localhost:${PORT}`);
+      console.log(`🤖 iAI:      http://localhost:${PORT}/iai.html`);
       console.log(`📊 Database: ${DB_PATH}`);
-      console.log(`\n✅ All systems operational - Press Ctrl+C to stop\n`);
+      console.log(`🧠 Memory:   ${require('./core/iai-memory').prototype ? 'ready' : 'ready'}`);
+      console.log(`\n✅ All systems operational — Press Ctrl+C to stop\n`);
+    });
+
+    server.on('error', err => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ Port ${PORT} is already in use.`);
+        console.error(`   Run: kill $(lsof -t -i:${PORT})  or use PORT=<other> npm run web\n`);
+      } else {
+        console.error('❌ Server error:', err.message);
+      }
+      process.exit(1);
     });
   } catch (error) {
     console.error("❌ Server startup failed:", error.message);

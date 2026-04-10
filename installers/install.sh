@@ -246,7 +246,7 @@ setup_project_structure() {
     
     # Create necessary directories
     mkdir -p "$APP_DIR/core"
-    mkdir -p "$APP_DIR/memory"
+    mkdir -p "$APP_DIR/memory/iai/episodes"
     mkdir -p "$APP_DIR/cli"
     mkdir -p "$APP_DIR/configs"
     mkdir -p "$APP_DIR/public"
@@ -303,7 +303,10 @@ LOG_LEVEL=info
 LOG_FILE=./logs/app.log
 
 # Optional: External Services
-# GITHUB_TOKEN=your_github_token
+# iAI — Intelligent Assistant (GitHub Copilot API)
+# Get a token at: https://github.com/settings/tokens (needs "Copilot Requests" scope)
+GH_TOKEN=
+# OpenAI API key — enables TTS voice output in iAI (optional)
 # OPENAI_API_KEY=your_openai_key
 # ANTHROPIC_API_KEY=your_anthropic_key
 

@@ -101,6 +101,7 @@ create_structure() {
     mkdir -p test-data
     mkdir -p logs
     mkdir -p configs
+    mkdir -p memory/iai/episodes
     
     print_status "Project structure created"
 }
@@ -143,6 +144,13 @@ API_KEY=development-key-change-in-production
 CORS_ORIGIN=http://localhost:3000
 MAX_FILE_SIZE=104857600
 FORCE_TIER=
+
+# iAI — Intelligent Assistant
+# Set GH_TOKEN to a GitHub personal access token with "Copilot Requests" scope
+# Get one at: https://github.com/settings/tokens
+GH_TOKEN=
+# Set OPENAI_API_KEY to enable TTS voice output in iAI (optional)
+OPENAI_API_KEY=
 EOF
         print_status ".env configuration file created"
     fi
@@ -266,40 +274,49 @@ show_instructions() {
     echo "  1. Navigate to project directory:"
     echo "     cd $(pwd)"
     echo ""
-    echo "  2. Start the server:"
-    echo "     npm run web"
-    echo "     OR"
-    echo "     ./start.sh"
+    echo "  2. (Optional) Enable iAI assistant:"
+    echo "     export GH_TOKEN=<github_token_with_copilot_scope>"
+    echo "     export OPENAI_API_KEY=<openai_key>    # for voice output"
+    echo "     Or add them to .env (already created)"
     echo ""
-    echo "  3. Open in browser:"
+    echo "  3. Start the server:"
+    echo "     npm run web"
+    echo ""
+    echo "  4. Open in browser:"
     echo "     http://localhost:3000"
+    echo "     http://localhost:3000/iai.html  ← iAI assistant"
     echo ""
     echo -e "${GREEN}Useful Commands:${NC}"
     echo ""
-    echo "  npm run web        - Start development server"
+    echo "  npm run web        - Start server"
+    echo "  npm start          - Start server (alias)"
     echo "  npm run cli        - Run CLI interface"
-    echo "  bash run-tests.sh  - Run comprehensive test suite"
+    echo "  npm test           - Run test suite"
+    echo "  bash run-tests.sh  - Run comprehensive tests"
     echo ""
     echo -e "${GREEN}First Steps:${NC}"
     echo ""
-    echo "  1. Go to http://localhost:3000/settings.html"
+    echo "  1. Go to http://localhost:3000/iai.html"
+    echo "     → Chat with iAI (set GH_TOKEN first for best results)"
+    echo ""
+    echo "  2. Go to http://localhost:3000/settings.html"
     echo "     → Configure hardware tier and deployment mode"
     echo ""
-    echo "  2. Go to http://localhost:3000/data-import.html"
+    echo "  3. Go to http://localhost:3000/data-import.html"
     echo "     → Import your first data file (CSV/Excel/TXT)"
     echo ""
-    echo "  3. Go to http://localhost:3000/query-builder-form.html"
+    echo "  4. Go to http://localhost:3000/query-builder-form.html"
     echo "     → Build and test SQL queries"
     echo ""
-    echo "  4. Go to http://localhost:3000/query-builder-visual.html"
+    echo "  5. Go to http://localhost:3000/query-builder-visual.html"
     echo "     → Use visual query builder with drag-drop"
     echo ""
     echo -e "${GREEN}Documentation:${NC}"
     echo ""
-    echo "  • Comprehensive Guide: COMPREHENSIVE_DOCS.md"
-    echo "  • API Reference: API_REFERENCE.md"
-    echo "  • Architecture: ARCHITECTURE.md"
-    echo "  • Contributing: CONTRIBUTING.md"
+    echo "  • Installation Guide: INSTALLATION_GUIDE.md"
+    echo "  • User Manual:        USER_MANUAL.md"
+    echo "  • Changelog:          CHANGELOG.md"
+    echo "  • Contributing:       CONTRIBUTING.md"
     echo ""
     echo -e "${GREEN}System Information:${NC}"
     echo ""
@@ -309,7 +326,7 @@ show_instructions() {
     echo "  • Database: ./prompt_engine.db"
     echo "  • Installation: $(pwd)"
     echo ""
-    echo -e "${BLUE}Need help? Visit: https://github.com/yourusername/claude-prompt-engine${NC}"
+    echo -e "${BLUE}Need help? Visit: https://github.com/EDP1973/Claude_Prompt_Engine-v3.0${NC}"
     echo ""
 }
 

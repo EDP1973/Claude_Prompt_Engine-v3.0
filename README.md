@@ -1,30 +1,35 @@
 # Claude Prompt Engine
 
-> Enterprise-grade data import, validation, and query builder platform with Vicidial integration
+> Intelligent AI assistant (iAI), data import wizard, visual query builder, and Vicidial integration platform
 
-![Version](https://img.shields.io/badge/version-3.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
 ## 🚀 Features
 
+- 🤖 **iAI — Intelligent Assistant** - Context-aware AI chat powered by GitHub Copilot, with long-term memory (episodic/semantic/procedural), tool execution pipeline, web search, and voice I/O
 - 📊 **Intelligent Data Import** - CSV, Excel, Text file parsing with auto-validation
 - 🔍 **Query Builders** - Form-based and visual drag-drop SQL query builders
 - 📱 **Vicidial Mapping** - Map data fields to Vicidial telephony standards
 - ⚙️ **Hardware-Aware** - Auto-detect system resources and optimize configuration
 - 🔒 **Data Validation** - Phone format checking, duplicate detection, quality scoring
 - 🎨 **Modern UI** - Glasmorphic design with responsive layouts
-- 🖧 **REST API** - 27 endpoints for programmatic access
+- 🖧 **REST API** - 40+ endpoints for programmatic access
 - 🌐 **Multi-Deployment** - Local, server, or cloud deployment
 
 ## ⚡ Quick Start
 
 ```bash
 # Clone and install
-git clone https://github.com/yourusername/claude-prompt-engine.git
-cd claude-prompt-engine
+git clone https://github.com/EDP1973/Claude_Prompt_Engine-v3.0.git
+cd Claude_Prompt_Engine-v3.0
 npm install
+
+# (Optional) Enable iAI — set your GitHub token with Copilot access
+export GH_TOKEN=your_github_token
+export OPENAI_API_KEY=your_openai_key   # for TTS voice output
 
 # Start server
 npm run web
@@ -33,31 +38,91 @@ npm run web
 open http://localhost:3000
 ```
 
+## 🤖 iAI Setup
+
+iAI works with **two engines** (auto-detected):
+
+| Engine | Requirement | Capability |
+|--------|------------|-----------|
+| GitHub Copilot API | `GH_TOKEN` with Copilot Requests scope | Full chat, all models |
+| GitHub CLI fallback | `gh` CLI authenticated | Basic suggestions |
+
+```bash
+# Set in your shell profile (~/.bashrc or ~/.zshrc)
+export GH_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+export OPENAI_API_KEY=sk-xxxx            # optional — enables TTS voice
+```
+
+iAI features:
+- 🧠 **Long-term memory** — remembers facts, patterns, and tool usage across sessions
+- ⚙️ **Tool pipeline** — executes app tools (query builder, data import, etc.) on demand
+- 🌐 **Web search** — DuckDuckGo instant answers, no API key needed
+- 🎤 **Voice input** — Web Speech API (browser)
+- 🔊 **Voice output** — OpenAI TTS or browser speech synthesis fallback
+
 ## 📖 Documentation
 
-- **[Comprehensive Guide](COMPREHENSIVE_DOCS.md)** - Full feature documentation
-- **[API Reference](API_REFERENCE.md)** - REST API endpoints
-- **[Architecture](ARCHITECTURE.md)** - System design overview
 - **[Installation Guide](INSTALLATION_GUIDE.md)** - Detailed setup instructions
 - **[User Manual](USER_MANUAL.md)** - End-user guide
+- **[Comprehensive Guide](COMPREHENSIVE_DOCS.md)** - Full feature documentation
+- **[Changelog](CHANGELOG.md)** - Version history
 
 ## 🏗 Project Structure
 
 ```
 claude-prompt-engine/
-├── core/                    # Business logic modules (6 modules)
-├── public/                  # Browser UI (4 pages + JS controllers)
-├── migrations/              # Database schema
-├── test-data/               # Sample files
-├── server.js                # HTTP server
-└── package.json             # Dependencies
+├── core/
+│   ├── iai-handler.js        # iAI chat pipeline (memory + tools + AI)
+│   ├── iai-memory.js         # Episodic / semantic / procedural memory
+│   ├── iai-tools.js          # 27-tool registry with auto-execution
+│   ├── iai-browse.js         # Web search & page fetch
+│   ├── generator.js          # Prompt engine
+│   ├── vicidial-mapper.js    # Field mapping
+│   ├── data-importer.js      # File parsing
+│   ├── data-validator.js     # Validation
+│   ├── query-builder.js      # SQL generation
+│   └── advanced-query-generator.js
+├── public/
+│   ├── iai.html              # iAI chat interface
+│   ├── index.html            # Main dashboard
+│   ├── data-import.html      # Import wizard
+│   ├── query-builder-*.html  # Query builders
+│   └── settings.html         # Configuration
+├── memory/iai/               # iAI persistent memory (auto-created)
+├── server.js                 # HTTP server (40+ API routes)
+├── index.js                  # CLI entry point
+└── package.json
 ```
 
 ## 🧪 Testing
 
 ```bash
-# Run all tests
 npm test
+# or
+bash run-tests.sh
+```
+
+## 📡 Key API Endpoints
+
+| Category | Endpoints |
+|----------|-----------|
+| iAI Chat | `POST /api/iai/chat`, `GET /api/iai/status` |
+| iAI Memory | `GET /api/iai/memory/summary`, `/recall`, `/sessions`, `/export` |
+| iAI Browse | `POST /api/iai/browse/search`, `/fetch` |
+| iAI Updates | `GET /api/iai/update/check`, `POST /api/iai/update/apply` |
+| iAI TTS | `POST /api/iai/tts` |
+| Data Import | `POST /api/import/validate`, `/upload` |
+| Query Builder | `POST /api/query-builder/generate`, `/analyze` |
+| Config | `GET /api/config/current`, `/detect-hardware` |
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE)
+
 
 # Run quick validation
 bash run-tests.sh

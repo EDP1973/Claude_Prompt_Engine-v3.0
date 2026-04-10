@@ -1,19 +1,41 @@
 {
   "name": "claude-prompt-engine",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "bin": {
     "cpe": "./index.js"
   },
   "type": "commonjs",
   "scripts": {
     "web": "node server.js",
-    "cli": "node index.js"
+    "cli": "node index.js",
+    "start": "node server.js",
+    "test": "node test-suite.js",
+    "stop": "node -e \"const {execSync}=require(\"child_process\");try{execSync(\"fuser -k 3000/tcp\")}catch(e){}\""
   },
   "dependencies": {
-    "axios": "^1.14.0",
     "xlsx": "^0.18.5",
     "csv-parse": "^5.4.1",
     "validator": "^13.11.0",
-    "sqlite3": "^5.1.6"
-  }
+    "sqlite3": "^5.1.6",
+    "express": "^4.18.2"
+  },
+  "description": "Intelligent AI assistant, data import, query builder, and Vicidial integration platform",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "ai",
+    "prompt-engine",
+    "vicidial",
+    "data-import",
+    "query-builder",
+    "copilot",
+    "iai"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EDP1973/Claude_Prompt_Engine-v3.0"
+  },
+  "license": "MIT"
 }
