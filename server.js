@@ -6,6 +6,10 @@ const sqlite3 = require("sqlite3").verbose();
 const PromptEngine = require("./core/generator");
 const Memory = require("./memory/memory");
 const CopilotHandler = require("./cli/copilot-handler");
+const IAIHandler = require("./core/iai-handler");
+const IAIMemory  = require("./core/iai-memory");
+const IAITools   = require("./core/iai-tools");
+const IAIBrowse  = require("./core/iai-browse");
 
 // Phase 3: Import new modules
 const InstallConfig = require("./core/install-config");
@@ -23,6 +27,12 @@ const DB_PATH = path.join(__dirname, "prompt_engine.db");
 const engine = new PromptEngine();
 const memory = new Memory();
 const copilotHandler = new CopilotHandler();
+
+// iAI subsystems
+const iaiMemory = new IAIMemory();
+const iaiTools  = new IAITools();
+const iaiBrowse = new IAIBrowse();
+const iaiHandler = new IAIHandler({ memory: iaiMemory, tools: iaiTools });
 
 // Phase 3: Initialize Phase 1 modules
 const installConfig = new InstallConfig();
@@ -729,6 +739,200 @@ async function handleAPI(req, res, pathname, query) {
         res.writeHead(400);
         res.end(JSON.stringify({ error: error.message }));
       }
+      return;
+    }
+
+    // ── iAI routes ────────────────────────────────────────────────────────
+    else if (pathname === "/api/iai/status" && req.method === "GET") {
+      const status = await iaiHandler.status();
+      res.writeHead(200);
+      res.end(JSON.stringify(status));
+      return;
+    }
+
+    else if (pathname === "/api/iai/chat" && req.method === "POST") {
+      parseBody(req, async (err, data) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: "Invalid JSON" })); return; }
+        try {
+          const { messages, context, model } = data;
+          if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            res.writeHead(400); res.end(JSON.stringify({ error: "messages array required" })); return;
+          }
+          const result = await iaiHandler.chat(messages, context || 'general', model || null);
+          res.writeHead(200);
+          res.end(JSON.stringify(result));
+        } catch(e) {
+          res.writeHead(503);
+          res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+      return;
+    }
+
+    else if (pathname === "/api/iai/tts" && req.method === "POST") {
+      parseBody(req, async (err, data) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: "Invalid JSON" })); return; }
+        const { text, voice } = data;
+        if (!text) { res.writeHead(400); res.end(JSON.stringify({ error: "text required" })); return; }
+
+        const openaiKey = process.env.OPENAI_API_KEY;
+        if (!openaiKey) {
+          res.writeHead(503); res.end(JSON.stringify({ error: "OPENAI_API_KEY not set" })); return;
+        }
+
+        const body = JSON.stringify({ model: 'tts-1', input: text.slice(0, 4096), voice: voice || 'nova' });
+        const https = require('https');
+        const ttsReq = https.request({
+          hostname: 'api.openai.com',
+          path: '/v1/audio/speech',
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiKey}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(body)
+          }
+        }, ttsRes => {
+          if (ttsRes.statusCode !== 200) {
+            let e = '';
+            ttsRes.on('data', d => e += d);
+            ttsRes.on('end', () => { res.writeHead(502); res.end(JSON.stringify({ error: e })); });
+            return;
+          }
+          res.writeHead(200, { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'no-store' });
+          ttsRes.pipe(res);
+        });
+        ttsReq.on('error', e => { res.writeHead(502); res.end(JSON.stringify({ error: e.message })); });
+        ttsReq.setTimeout(20000, () => { ttsReq.destroy(); res.writeHead(504); res.end(JSON.stringify({ error: 'TTS timeout' })); });
+        ttsReq.write(body);
+        ttsReq.end();
+      });
+      return;
+    }
+
+    // ── iAI Memory routes ──────────────────────────────────────────────────
+
+    else if (pathname === "/api/iai/memory/summary" && req.method === "GET") {
+      try {
+        const summary = await iaiMemory.getSummary();
+        res.writeHead(200); res.end(JSON.stringify(summary));
+      } catch(e) {
+        res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+      }
+      return;
+    }
+
+    else if (pathname === "/api/iai/memory/recall" && req.method === "GET") {
+      const q = query.q || '';
+      if (!q) { res.writeHead(400); res.end(JSON.stringify({ error: "q param required" })); return; }
+      try {
+        const results = await iaiMemory.recall(q, { limit: parseInt(query.limit) || 10 });
+        res.writeHead(200); res.end(JSON.stringify({ query: q, results }));
+      } catch(e) {
+        res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+      }
+      return;
+    }
+
+    else if (pathname === "/api/iai/memory/sessions" && req.method === "GET") {
+      try {
+        const sessions = iaiMemory.listSessions();
+        res.writeHead(200); res.end(JSON.stringify({ sessions }));
+      } catch(e) {
+        res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+      }
+      return;
+    }
+
+    else if (pathname === "/api/iai/memory/export" && req.method === "GET") {
+      try {
+        const data = await iaiMemory.export();
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Disposition': 'attachment; filename="iai-memory.json"' });
+        res.end(JSON.stringify(data, null, 2));
+      } catch(e) {
+        res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+      }
+      return;
+    }
+
+    else if (pathname === "/api/iai/memory/remember" && req.method === "POST") {
+      parseBody(req, async (err, data) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: "Invalid JSON" })); return; }
+        const { category, content, key, confidence } = data;
+        if (!category || !content) { res.writeHead(400); res.end(JSON.stringify({ error: "category and content required" })); return; }
+        try {
+          const id = await iaiMemory.remember(category, content, { key, confidence: confidence || 1.0, source: 'user' });
+          res.writeHead(200); res.end(JSON.stringify({ id, saved: true }));
+        } catch(e) {
+          res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+      return;
+    }
+
+    // ── iAI Browse routes ──────────────────────────────────────────────────
+
+    else if (pathname === "/api/iai/browse/search" && req.method === "POST") {
+      parseBody(req, async (err, data) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: "Invalid JSON" })); return; }
+        const { query: q, maxResults } = data;
+        if (!q) { res.writeHead(400); res.end(JSON.stringify({ error: "query required" })); return; }
+        try {
+          const results = await iaiBrowse.search(q, maxResults || 5);
+          res.writeHead(200); res.end(JSON.stringify(results));
+        } catch(e) {
+          res.writeHead(502); res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+      return;
+    }
+
+    else if (pathname === "/api/iai/browse/fetch" && req.method === "POST") {
+      parseBody(req, async (err, data) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: "Invalid JSON" })); return; }
+        const { url: targetUrl } = data;
+        if (!targetUrl) { res.writeHead(400); res.end(JSON.stringify({ error: "url required" })); return; }
+        try {
+          const result = await iaiBrowse.fetchPage(targetUrl);
+          res.writeHead(200); res.end(JSON.stringify(result));
+        } catch(e) {
+          res.writeHead(502); res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+      return;
+    }
+
+    // ── iAI Update routes ──────────────────────────────────────────────────
+
+    else if (pathname === "/api/iai/update/check" && req.method === "GET") {
+      const { exec } = require('child_process');
+      exec('git fetch origin --dry-run 2>&1 && git log HEAD..origin/HEAD --oneline 2>/dev/null | head -10',
+        { cwd: __dirname, timeout: 15000 },
+        (err, stdout, stderr) => {
+          const behind = (stdout || '').trim().split('\n').filter(Boolean);
+          res.writeHead(200);
+          res.end(JSON.stringify({
+            updateAvailable: behind.length > 0,
+            commitsAhead: behind.length,
+            commits: behind,
+            currentVersion: require('./package.json').version
+          }));
+        }
+      );
+      return;
+    }
+
+    else if (pathname === "/api/iai/update/apply" && req.method === "POST") {
+      const { exec } = require('child_process');
+      exec('git pull origin HEAD 2>&1 && npm install --silent 2>&1',
+        { cwd: __dirname, timeout: 60000 },
+        (err, stdout) => {
+          if (err) {
+            res.writeHead(500); res.end(JSON.stringify({ error: err.message, output: stdout }));
+          } else {
+            res.writeHead(200); res.end(JSON.stringify({ success: true, output: stdout.slice(0, 2000), message: 'Update applied. Restart the server to complete.' }));
+          }
+        }
+      );
       return;
     }
 
