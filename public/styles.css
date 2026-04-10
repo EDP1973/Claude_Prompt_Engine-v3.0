@@ -633,3 +633,48 @@ option:checked {
   background: linear-gradient(rgba(0, 217, 255, 0.3), rgba(0, 217, 255, 0.3)) !important;
   color: black !important;
 }
+
+/* ── Phase 2 Tool Cards ── */
+.p2-tool-card {
+  background: rgba(0, 217, 255, 0.04);
+  border: 1px solid rgba(0, 217, 255, 0.18);
+  border-radius: 12px;
+  padding: 1.5rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.p2-tool-card:hover {
+  background: rgba(0, 217, 255, 0.1);
+  border-color: rgba(0, 217, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 217, 255, 0.15);
+}
+
+.p2-tool-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.p2-tool-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.p2-tool-desc {
+  font-size: 0.83rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.p2-tool-btn {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  align-self: flex-start;
+}

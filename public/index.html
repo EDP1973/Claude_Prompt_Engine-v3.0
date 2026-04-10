@@ -7,7 +7,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main>
+  <!-- Android humanoid animated background -->
+  <canvas id="androidBg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+  <main style="position:relative;z-index:1;">
     <div class="container">
       <!-- Header -->
       <div class="header">
@@ -34,6 +37,39 @@
             <button class="btn" id="copilotCliBtn" style="font-size: 0.85rem; padding: 0.75rem 1rem;">
               🔗 Link Copilot Account
             </button>
+          </div>
+        </div>
+      </div>
+      <!-- Smart Builder Section — pinned at top for quick access -->
+      <div class="card full" id="smartBuilder" style="border-color:rgba(0,212,255,0.45);background:rgba(0,10,20,0.75);">
+        <div class="card-title" style="font-size:1.15rem;">⚡ Smart Builder</div>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.25rem;">
+          Import data, auto-detect columns, and build queries — all in one place.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div class="p2-tool-card" onclick="openTool('smart-builder.html', '⚡ Smart Builder — Import + Query')">
+            <div class="p2-tool-icon">⚡</div>
+            <div class="p2-tool-name">Smart Builder</div>
+            <div class="p2-tool-desc">Side-by-side import wizard and query builder — auto-detects first name, last name, phone, DOB→age, party, county, district &amp; more.</div>
+            <button class="btn p2-tool-btn">Open Smart Builder →</button>
+          </div>
+          <div class="p2-tool-card" onclick="openTool('data-import.html', '📥 Data Import Wizard')">
+            <div class="p2-tool-icon">📥</div>
+            <div class="p2-tool-name">Data Import</div>
+            <div class="p2-tool-desc">5-step wizard — upload CSV, Excel, or text files, auto-detect format, smart-map to Vicidial fields, validate &amp; confirm.</div>
+            <button class="btn p2-tool-btn">Open Wizard →</button>
+          </div>
+          <div class="p2-tool-card" onclick="openTool('query-builder-visual.html', '🎨 Visual Query Builder')">
+            <div class="p2-tool-icon">🎨</div>
+            <div class="p2-tool-name">Visual Builder</div>
+            <div class="p2-tool-desc">Drag-and-drop query builder — pull columns from the palette, set operators, and generate SQL visually.</div>
+            <button class="btn p2-tool-btn">Open Visual →</button>
+          </div>
+          <div class="p2-tool-card" onclick="openTool('settings.html', '⚙️ Settings')">
+            <div class="p2-tool-icon">⚙️</div>
+            <div class="p2-tool-name">Settings</div>
+            <div class="p2-tool-desc">Configure deployment mode, hardware tier, performance limits, security settings, and database connection.</div>
+            <button class="btn p2-tool-btn">Open Settings →</button>
           </div>
         </div>
       </div>
@@ -528,7 +564,379 @@
     </footer>
   </main>
 
+  <!-- Phase 2 Tool Modal Overlay -->
+  <div id="p2Modal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(5, 5, 20, 0.96);
+    flex-direction: column;
+  ">
+    <div style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      background: rgba(0, 217, 255, 0.07);
+      border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+      flex-shrink: 0;
+    ">
+      <span id="p2ModalTitle" style="color: var(--primary); font-weight: 700; font-size: 1.05rem;"></span>
+      <button onclick="closeTool()" style="
+        background: rgba(255,0,110,0.2);
+        border: 1px solid rgba(255,0,110,0.5);
+        color: #ff006e;
+        padding: 0.4rem 1.1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+      ">✕ Close</button>
+    </div>
+    <iframe id="p2Frame" src="" style="
+      flex: 1;
+      width: 100%;
+      border: none;
+      display: block;
+    " title="Phase 2 Tool"></iframe>
+  </div>
+
   <script src="app.js"></script>
   <script src="features.js"></script>
+  <script>
+    function openTool(page, title) {
+      const modal = document.getElementById('p2Modal');
+      const frame = document.getElementById('p2Frame');
+      const titleEl = document.getElementById('p2ModalTitle');
+      titleEl.textContent = title;
+      frame.src = '/' + page;
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeTool() {
+      const modal = document.getElementById('p2Modal');
+      const frame = document.getElementById('p2Frame');
+      modal.style.display = 'none';
+      frame.src = '';
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeTool();
+    });
+  </script>
+
+  <!-- ── Android Humanoid Animated Background ─────────────────────────── -->
+  <script>
+  (function() {
+    const canvas = document.getElementById('androidBg');
+    const ctx    = canvas.getContext('2d');
+
+    let W, H, cx, cy, sc;
+    let fhX, fhY;          // forehead / shock-wave origin
+    let breathPhase = 0;
+    let eyePulse = 0;
+    const waves   = [];    // shock-wave rings
+    const particles = [];  // floating data particles
+    let lastWave = 0;
+    const WAVE_INTERVAL = 900; // ms
+
+    // ── resize ──────────────────────────────────────────────────────────
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      cx = W * 0.5;
+      cy = H * 0.5 + H * 0.06;
+      sc = Math.min(W / 1200, H / 900) * 1.05;
+      // Fingertips rest on the forehead (left of centre — right hand raised)
+      fhX = cx - 4  * sc;
+      fhY = cy - 204 * sc;
+    }
+
+    // ── seed particles ──────────────────────────────────────────────────
+    function seedParticles() {
+      particles.length = 0;
+      for (let i = 0; i < 55; i++) {
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.5 + 0.4,
+          vx: (Math.random() - 0.5) * 0.18,
+          vy: (Math.random() - 0.5) * 0.18,
+          a: Math.random() * 0.35 + 0.08
+        });
+      }
+    }
+
+    resize();
+    seedParticles();
+    window.addEventListener('resize', () => { resize(); seedParticles(); });
+
+    // ── raf loop ────────────────────────────────────────────────────────
+    function loop(now) {
+      breathPhase += 0.012;
+      eyePulse    += 0.04;
+
+      // spawn wave
+      if (now - lastWave > WAVE_INTERVAL) {
+        waves.push({ r: 2, op: 0.85 });
+        lastWave = now;
+      }
+      waves.forEach(w => { w.r += 2.2 * sc; w.op *= 0.968; });
+      // prune dead waves
+      for (let i = waves.length - 1; i >= 0; i--)
+        if (waves[i].op < 0.012) waves.splice(i, 1);
+
+      // move particles
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      });
+
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // ── draw ────────────────────────────────────────────────────────────
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // deep-space gradient background
+      const bg = ctx.createRadialGradient(cx, cy * 0.7, 0, cx, cy, H);
+      bg.addColorStop(0, '#020c1b');
+      bg.addColorStop(0.55, '#010810');
+      bg.addColorStop(1,  '#000408');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // grid lines (subtle)
+      drawGrid();
+
+      // particles
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,180,220,${p.a})`;
+        ctx.fill();
+      });
+
+      // shock waves
+      waves.forEach(w => drawWave(w));
+
+      // android
+      drawAndroid();
+    }
+
+    function drawGrid() {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(0,100,160,0.06)';
+      ctx.lineWidth = 1;
+      const gx = 90, gy = 70;
+      for (let x = 0; x < W; x += gx) {
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += gy) {
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawWave(w) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(fhX, fhY, w.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0,212,255,${w.op * 0.55})`;
+      ctx.lineWidth   = 1.8;
+      ctx.shadowBlur  = 14;
+      ctx.shadowColor = `rgba(0,212,255,${w.op})`;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ── android humanoid ────────────────────────────────────────────────
+    function drawAndroid() {
+      const breath = Math.sin(breathPhase) * 2 * sc;
+      const eyeGlow = 0.55 + 0.45 * Math.sin(eyePulse);
+
+      ctx.save();
+      ctx.globalAlpha = 0.26;
+      ctx.lineWidth   = 2 * sc;
+      ctx.lineCap     = 'round';
+      ctx.lineJoin    = 'round';
+
+      const cyan = '#00d4ff';
+      const setGlow = (color, blur) => {
+        ctx.strokeStyle = color || cyan;
+        ctx.shadowColor = color || cyan;
+        ctx.shadowBlur  = (blur || 10) * sc;
+      };
+      const setFill = (color, blur) => {
+        ctx.fillStyle   = color || cyan;
+        ctx.shadowColor = color || cyan;
+        ctx.shadowBlur  = (blur || 10) * sc;
+      };
+
+      setGlow();
+
+      // ── HEAD ──
+      const hcx = cx, hcy = cy - 200 * sc + breath;
+      ctx.beginPath();
+      ctx.ellipse(hcx, hcy, 52 * sc, 58 * sc, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // face panel line
+      ctx.beginPath();
+      ctx.moveTo(hcx - 32 * sc, hcy - 6 * sc);
+      ctx.lineTo(hcx + 32 * sc, hcy - 6 * sc);
+      ctx.stroke();
+
+      // jaw detail
+      ctx.beginPath();
+      ctx.moveTo(hcx - 28 * sc, hcy + 28 * sc);
+      ctx.lineTo(hcx + 28 * sc, hcy + 28 * sc);
+      ctx.stroke();
+
+      // temple lines
+      ctx.globalAlpha = 0.15;
+      ctx.beginPath();
+      ctx.moveTo(hcx - 52 * sc, hcy - 10 * sc);
+      ctx.lineTo(hcx - 36 * sc, hcy - 10 * sc);
+      ctx.moveTo(hcx + 52 * sc, hcy - 10 * sc);
+      ctx.lineTo(hcx + 36 * sc, hcy - 10 * sc);
+      ctx.stroke();
+      ctx.globalAlpha = 0.26;
+
+      // ── EYES ──
+      ctx.globalAlpha = eyeGlow * 0.9;
+      setFill(`rgba(0,212,255,${eyeGlow})`, 18);
+      ctx.beginPath();
+      ctx.ellipse(hcx - 19 * sc, hcy - 14 * sc, 9 * sc, 6 * sc, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(hcx + 19 * sc, hcy - 14 * sc, 9 * sc, 6 * sc, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.26;
+
+      // ── NECK ──
+      setGlow();
+      ctx.beginPath();
+      ctx.moveTo(hcx - 12 * sc, hcy + 55 * sc);
+      ctx.lineTo(hcx - 12 * sc, cy - 115 * sc);
+      ctx.moveTo(hcx + 12 * sc, hcy + 55 * sc);
+      ctx.lineTo(hcx + 12 * sc, cy - 115 * sc);
+      ctx.stroke();
+
+      // ── BODY (trapezoid) ──
+      ctx.beginPath();
+      ctx.moveTo(cx - 74 * sc, cy - 112 * sc);
+      ctx.lineTo(cx + 74 * sc, cy - 112 * sc);
+      ctx.lineTo(cx + 50 * sc, cy + 48 * sc);
+      ctx.lineTo(cx - 50 * sc, cy + 48 * sc);
+      ctx.closePath();
+      ctx.stroke();
+
+      // chest horizontal lines
+      ctx.beginPath();
+      ctx.moveTo(cx - 58 * sc, cy - 78 * sc);
+      ctx.lineTo(cx + 58 * sc, cy - 78 * sc);
+      ctx.moveTo(cx - 52 * sc, cy - 40 * sc);
+      ctx.lineTo(cx + 52 * sc, cy - 40 * sc);
+      ctx.moveTo(cx - 46 * sc, cy     );
+      ctx.lineTo(cx + 46 * sc, cy     );
+      ctx.stroke();
+
+      // ── POWER CORE (glowing chest orb) ──
+      ctx.globalAlpha = 0.8 + 0.2 * Math.sin(breathPhase * 2);
+      setFill(cyan, 22);
+      ctx.beginPath();
+      ctx.arc(cx, cy - 58 * sc, 9 * sc, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.26;
+      setGlow();
+
+      // ── LEFT ARM (relaxed, hanging) ──
+      ctx.beginPath();
+      ctx.moveTo(cx - 74 * sc, cy - 100 * sc);
+      ctx.quadraticCurveTo(cx - 105 * sc, cy - 20 * sc, cx - 98 * sc, cy + 55 * sc);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - 98 * sc, cy + 55 * sc);
+      ctx.lineTo(cx - 92 * sc, cy + 108 * sc);
+      ctx.stroke();
+      // left knuckles
+      ctx.beginPath();
+      ctx.arc(cx - 92 * sc, cy + 112 * sc, 8 * sc, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // ── RIGHT ARM (raised to forehead) ──
+      // upper arm: shoulder → elbow (up and left)
+      ctx.beginPath();
+      ctx.moveTo(cx + 74 * sc, cy - 100 * sc);
+      ctx.quadraticCurveTo(cx + 100 * sc, cy - 148 * sc, cx + 58 * sc, cy - 168 * sc);
+      ctx.stroke();
+      // forearm: elbow → wrist at forehead
+      ctx.beginPath();
+      ctx.moveTo(cx + 58 * sc, cy - 168 * sc);
+      ctx.lineTo(cx + 16 * sc, cy - 196 * sc);
+      ctx.stroke();
+
+      // ── TWO FINGERS on forehead ──
+      // index finger
+      ctx.beginPath();
+      ctx.moveTo(cx + 16 * sc, cy - 196 * sc);
+      ctx.lineTo(cx - 4  * sc, cy - 210 * sc);
+      ctx.stroke();
+      // middle finger (slightly below)
+      ctx.beginPath();
+      ctx.moveTo(cx + 16 * sc, cy - 193 * sc);
+      ctx.lineTo(cx - 2  * sc, cy - 205 * sc);
+      ctx.stroke();
+
+      // fingertip glow dots (the shock-wave origin)
+      ctx.globalAlpha = 0.85;
+      setFill(cyan, 16);
+      ctx.beginPath();
+      ctx.arc(cx - 4 * sc, cy - 210 * sc, 3.5 * sc, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx - 2 * sc, cy - 205 * sc, 3.5 * sc, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.26;
+      setGlow();
+
+      // ── LEGS ──
+      ctx.beginPath();
+      ctx.moveTo(cx - 33 * sc, cy + 48 * sc);
+      ctx.lineTo(cx - 40 * sc, cy + 130 * sc);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - 40 * sc, cy + 130 * sc);
+      ctx.lineTo(cx - 58 * sc, cy + 172 * sc);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - 58 * sc, cy + 172 * sc);
+      ctx.lineTo(cx - 84 * sc, cy + 178 * sc);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx + 33 * sc, cy + 48 * sc);
+      ctx.lineTo(cx + 40 * sc, cy + 130 * sc);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 40 * sc, cy + 130 * sc);
+      ctx.lineTo(cx + 58 * sc, cy + 172 * sc);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 58 * sc, cy + 172 * sc);
+      ctx.lineTo(cx + 80 * sc, cy + 178 * sc);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    requestAnimationFrame(loop);
+  })();
+  </script>
 </body>
 </html>
