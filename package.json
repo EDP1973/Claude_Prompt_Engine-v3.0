@@ -9,8 +9,10 @@
     "web": "node server.js",
     "cli": "node index.js",
     "start": "node server.js",
+    "setup": "bash setup-keys.sh",
+    "setup:win": "powershell -ExecutionPolicy Bypass -File setup-keys.ps1",
     "test": "node test-suite.js",
-    "stop": "node -e \"const {execSync}=require(\"child_process\");try{execSync(\"fuser -k 3000/tcp\")}catch(e){}\""
+    "stop": "node -e \"const {execSync}=require('child_process');try{execSync('fuser -k 3000/tcp')}catch(e){}\""
   },
   "dependencies": {
     "xlsx": "^0.18.5",

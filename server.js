@@ -1,3 +1,14 @@
+// Load .env before anything else
+const envPath = require("path").join(__dirname, ".env");
+if (require("fs").existsSync(envPath)) {
+  require("fs").readFileSync(envPath, "utf8")
+    .split("\n")
+    .forEach(line => {
+      const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim();
+    });
+}
+
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
@@ -936,6 +947,141 @@ async function handleAPI(req, res, pathname, query) {
       return;
     }
 
+    // ── Setup Wizard API ───────────────────────────────────────────────────────
+
+    else if (pathname === "/api/setup/config" && req.method === "GET") {
+      // Return masked config (keys truncated, not full values)
+      const cfg = {};
+      const mask = v => v ? v.substring(0, 8) + '…' : '';
+      cfg.OPENAI_API_KEY = mask(process.env.OPENAI_API_KEY);
+      cfg.GH_TOKEN       = mask(process.env.GH_TOKEN);
+      cfg.TELNYX_API_KEY = mask(process.env.TELNYX_API_KEY);
+      cfg.MYSQL_HOST     = process.env.MYSQL_HOST || 'localhost';
+      cfg.MYSQL_USER     = process.env.MYSQL_USER || 'root';
+      cfg.MYSQL_DB       = process.env.MYSQL_DB   || 'vicidial';
+      cfg.PORT           = process.env.PORT        || '3000';
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(cfg));
+      return;
+    }
+
+    else if (pathname === "/api/setup/validate-key" && req.method === "POST") {
+      parseBody(req, async (err, data) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: 'Bad request' })); return; }
+        const { type, key } = data;
+        const https = require('https');
+
+        const httpsGet = (opts) => new Promise((resolve, reject) => {
+          const req2 = https.request(opts, r => {
+            let d = ''; r.on('data', c => d += c);
+            r.on('end', () => resolve({ status: r.statusCode, body: d }));
+          });
+          req2.on('error', reject);
+          req2.setTimeout(8000, () => { req2.destroy(); reject(new Error('timeout')); });
+          req2.end();
+        });
+
+        try {
+          if (type === 'openai') {
+            const r = await httpsGet({
+              hostname: 'api.openai.com', path: '/v1/models',
+              headers: { 'Authorization': `Bearer ${key}` }
+            });
+            if (r.status !== 200) {
+              res.writeHead(200); res.end(JSON.stringify({ valid: false, error: 'Invalid key' })); return;
+            }
+            const chatBody = JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: 'ok' }], max_tokens: 3 });
+            const chatOpts = {
+              hostname: 'api.openai.com', path: '/v1/chat/completions', method: 'POST',
+              headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(chatBody) }
+            };
+            const chatReq = https.request(chatOpts, chatRes => {
+              let d = ''; chatRes.on('data', c => d += c);
+              chatRes.on('end', () => {
+                res.writeHead(200);
+                res.end(JSON.stringify({ valid: true, quota: chatRes.statusCode === 200, status: chatRes.statusCode }));
+              });
+            });
+            chatReq.on('error', () => { res.writeHead(200); res.end(JSON.stringify({ valid: true, quota: false })); });
+            chatReq.setTimeout(10000, () => chatReq.destroy());
+            chatReq.write(chatBody); chatReq.end();
+            return;
+          }
+
+          if (type === 'github') {
+            const r = await httpsGet({
+              hostname: 'api.github.com', path: '/user',
+              headers: { 'Authorization': `token ${key}`, 'User-Agent': 'claude-prompt-engine' }
+            });
+            if (r.status === 200) {
+              const user = JSON.parse(r.body);
+              res.writeHead(200); res.end(JSON.stringify({ valid: true, username: user.login }));
+            } else {
+              res.writeHead(200); res.end(JSON.stringify({ valid: false, error: 'Invalid token' }));
+            }
+            return;
+          }
+
+          res.writeHead(400); res.end(JSON.stringify({ error: 'Unknown key type' }));
+        } catch(e) {
+          res.writeHead(200); res.end(JSON.stringify({ valid: false, error: e.message }));
+        }
+      });
+      return;
+    }
+
+    else if (pathname === "/api/setup/save-env" && req.method === "POST") {
+      parseBody(req, (err, updates) => {
+        if (err) { res.writeHead(400); res.end(JSON.stringify({ error: 'Bad request' })); return; }
+        const envPath = path.join(__dirname, '.env');
+
+        let existing = {};
+        if (fs.existsSync(envPath)) {
+          fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+            const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
+            if (m) existing[m[1]] = m[2].trim();
+          });
+        }
+
+        Object.entries(updates).forEach(([k, v]) => {
+          if (v !== null && v !== undefined && v !== '') existing[k] = v;
+        });
+
+        const lines = [
+          '# Claude Prompt Engine — Environment Variables',
+          `# Updated by Setup Wizard on ${new Date().toISOString().slice(0,10)}`,
+          '# NEVER commit this file to version control',
+          '',
+          '# AI Engine',
+          `OPENAI_API_KEY=${existing.OPENAI_API_KEY || ''}`,
+          `GH_TOKEN=${existing.GH_TOKEN || ''}`,
+          '',
+          '# Telephony',
+          `TELNYX_API_KEY=${existing.TELNYX_API_KEY || ''}`,
+          '',
+          '# Database',
+          `MYSQL_HOST=${existing.MYSQL_HOST || 'localhost'}`,
+          `MYSQL_USER=${existing.MYSQL_USER || 'root'}`,
+          `MYSQL_PASS=${existing.MYSQL_PASS || ''}`,
+          `MYSQL_DB=${existing.MYSQL_DB || 'vicidial'}`,
+          '',
+          '# App',
+          `PORT=${existing.PORT || '3000'}`,
+          `NODE_ENV=${existing.NODE_ENV || 'development'}`,
+        ];
+
+        fs.writeFileSync(envPath, lines.join('\n') + '\n', 'utf8');
+
+        Object.entries(existing).forEach(([k, v]) => {
+          if (v) process.env[k] = v;
+        });
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, keys: Object.keys(updates) }));
+      });
+      return;
+    }
+
     else {
       res.writeHead(404);
       res.end(JSON.stringify({ error: "Not Found" }));
@@ -994,8 +1140,14 @@ async function startServer() {
       console.log(`\n✨ Claude Prompt Engine v${require('./package.json').version}\n`);
       console.log(`🌐 Server:   http://localhost:${PORT}`);
       console.log(`🤖 iAI:      http://localhost:${PORT}/iai.html`);
+      console.log(`🔑 Setup:    http://localhost:${PORT}/setup.html`);
       console.log(`📊 Database: ${DB_PATH}`);
-      console.log(`🧠 Memory:   ${require('./core/iai-memory').prototype ? 'ready' : 'ready'}`);
+      const hasOpenAI = !!process.env.OPENAI_API_KEY;
+      const hasGH     = !!(process.env.GH_TOKEN || process.env.GITHUB_TOKEN);
+      console.log(`🧠 AI Engine: ${hasOpenAI ? 'OpenAI ✅' : 'OpenAI ❌'} | Copilot: ${hasGH ? 'token set' : 'no token'}`);
+      if (!hasOpenAI) {
+        console.log(`\n  ⚠️  Run: npm run setup  — to configure API keys`);
+      }
       console.log(`\n✅ All systems operational — Press Ctrl+C to stop\n`);
     });
 

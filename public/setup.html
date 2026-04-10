@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iAI Setup Wizard — Claude Prompt Engine</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149;
+    --purple: #bc8cff; --orange: #f0883e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+  
+  .wizard-wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 80px; }
+  
+  .wizard-header { text-align: center; margin-bottom: 40px; }
+  .wizard-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .wizard-header h1 span { color: var(--accent); }
+  .wizard-header p { color: var(--muted); }
+  
+  .progress-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 32px; display: flex; gap: 0; align-items: center; }
+  .step-pip { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+  .step-pip .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--border); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; transition: all .2s; }
+  .step-pip.active  .dot { background: var(--accent); border-color: var(--accent); color: #000; }
+  .step-pip.done    .dot { background: var(--green); border-color: var(--green); color: #000; }
+  .step-pip label { font-size: 11px; color: var(--muted); text-align: center; max-width: 80px; }
+  .step-pip.active label { color: var(--accent); }
+  .step-pip.done label { color: var(--green); }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin-bottom: 18px; transition: background .3s; }
+  .step-line.done { background: var(--green); }
+  
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+  .card h2 { font-size: 18px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .card .desc { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .badge.required  { background: rgba(248,81,73,.15); color: var(--red); border: 1px solid rgba(248,81,73,.3); }
+  .badge.optional  { background: rgba(88,166,255,.1); color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .badge.done      { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+  
+  .field-row { margin-bottom: 16px; }
+  .field-row label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .field-row input[type=text], .field-row input[type=password] {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 14px; color: var(--text); font-size: 14px; font-family: 'Courier New', monospace;
+    transition: border-color .2s;
+  }
+  .field-row input:focus { outline: none; border-color: var(--accent); }
+  .field-row input.valid { border-color: var(--green); }
+  .field-row input.invalid { border-color: var(--red); }
+  .field-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-green { background: var(--green); color: #000; }
+  .btn-link { background: transparent; color: var(--accent); padding: 0; border: none; text-decoration: underline; cursor: pointer; font-size: 14px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .status-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; }
+  .status-row.ok     { background: rgba(63,185,80,.1); border: 1px solid rgba(63,185,80,.3); color: var(--green); }
+  .status-row.warn   { background: rgba(210,153,34,.1); border: 1px solid rgba(210,153,34,.3); color: var(--yellow); }
+  .status-row.error  { background: rgba(248,81,73,.1);  border: 1px solid rgba(248,81,73,.3);  color: var(--red); }
+  .status-row.info   { background: rgba(88,166,255,.08); border: 1px solid rgba(88,166,255,.2); color: var(--accent); }
+  
+  .open-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(88,166,255,.1); border: 1px solid rgba(88,166,255,.3); border-radius: 6px; color: var(--accent); font-size: 13px; cursor: pointer; text-decoration: none; transition: all .15s; margin-bottom: 12px; }
+  .open-btn:hover { background: rgba(88,166,255,.2); }
+  
+  .instructions { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-bottom: 16px; }
+  .instructions ol { padding-left: 18px; }
+  .instructions li { color: var(--muted); font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
+  .instructions li strong { color: var(--text); }
+  
+  .engine-status { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .engine-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .engine-card .engine-icon { font-size: 24px; margin-bottom: 6px; }
+  .engine-card .engine-name { font-size: 12px; color: var(--muted); }
+  .engine-card .engine-badge { font-size: 11px; font-weight: 700; margin-top: 4px; }
+  .engine-card.active { border-color: var(--green); }
+  
+  .btn-row { display: flex; gap: 12px; margin-top: 20px; }
+  .step-pane { display: none; }
+  .step-pane.active { display: block; }
+  
+  .deps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .dep-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+  .dep-item .dep-icon { font-size: 20px; }
+  .dep-item .dep-info { flex: 1; }
+  .dep-item .dep-name { font-size: 13px; font-weight: 600; }
+  .dep-item .dep-status { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .dep-item .dep-status.found { color: var(--green); }
+  .dep-item .dep-status.missing { color: var(--yellow); }
+
+  .final-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .final-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .final-item h4 { font-size: 13px; margin-bottom: 6px; }
+  .final-item p { font-size: 12px; color: var(--muted); }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin 1s linear infinite; display: inline-block; }
+  
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="wizard-wrap">
+
+  <div class="wizard-header">
+    <h1>🔑 <span>iAI</span> Setup Wizard</h1>
+    <p>Configure API keys, AI engines, and dependencies for Claude Prompt Engine</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progress-bar">
+    <div class="step-pip active" data-step="0" onclick="gotoStep(0)">
+      <div class="dot">1</div><label>Dependencies</label>
+    </div>
+    <div class="step-line" id="line-0"></div>
+    <div class="step-pip" data-step="1" onclick="gotoStep(1)">
+      <div class="dot">2</div><label>OpenAI Key</label>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-pip" data-step="2" onclick="gotoStep(2)">
+      <div class="dot">3</div><label>GitHub Token</label>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-pip" data-step="3" onclick="gotoStep(3)">
+      <div class="dot">4</div><label>Telnyx (VoIP)</label>
+    </div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-pip" data-step="4" onclick="gotoStep(4)">
+      <div class="dot">5</div><label>Database</label>
+    </div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-pip" data-step="5" onclick="gotoStep(5)">
+      <div class="dot">✓</div><label>Save & Launch</label>
+    </div>
+  </div>
+
+  <!-- Step 0: Dependencies -->
+  <div class="step-pane active" id="step-0">
+    <div class="card">
+      <h2>🔍 System Dependencies</h2>
+      <p class="desc">Checking what's installed and what's needed.</p>
+      <div class="deps-grid" id="deps-grid">
+        <div class="dep-item" id="dep-node">
+          <div class="dep-icon">⬡</div>
+          <div class="dep-info">
+            <div class="dep-name">Node.js</div>
+            <div class="dep-status" id="dep-node-status">Checking…</div>
+          </div>
+        </div>
+        <div class="dep-item" id="dep-npm">
+          <div class="dep-icon">📦</div>
+          <div class="dep-info">
+            <div class="dep-name">npm packages</div>
+            <div class="dep-status" id="dep-npm-status">Checking…</div>
+          </div>
+        </div>
+        <div class="dep-item" id="dep-git">
+          <div class="dep-icon">🐙</div>
+          <div class="dep-info">
+            <div class="dep-name">GitHub CLI</div>
+            <div class="dep-status" id="dep-git-status">Checking…</div>
+          </div>
+        </div>
+        <div class="dep-item" id="dep-openai">
+          <div class="dep-icon">🤖</div>
+          <div class="dep-info">
+            <div class="dep-name">OpenAI API</div>
+            <div class="dep-status" id="dep-openai-status">Checking…</div>
+          </div>
+        </div>
+      </div>
+      <div id="dep-warnings"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1: OpenAI -->
+  <div class="step-pane" id="step-1">
+    <div class="card">
+      <h2>🤖 OpenAI API Key <span class="badge required">Required for Chat</span></h2>
+      <p class="desc">Powers iAI's conversation intelligence. Requires a paid OpenAI account with billing credit.</p>
+
+      <a class="open-btn" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">
+        🔗 Open platform.openai.com/api-keys
+      </a>
+
+      <div class="instructions">
+        <ol>
+          <li>Sign in at <strong>platform.openai.com</strong> (create free account if needed)</li>
+          <li>Click <strong>"+ Create new secret key"</strong></li>
+          <li>Name it: <strong>claude-prompt-engine-iai</strong></li>
+          <li>Select all permissions and click <strong>Create secret key</strong></li>
+          <li>Copy the key (it starts with <code>sk-proj-</code>)</li>
+          <li>If quota errors: add billing at <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" style="color:var(--accent)">Billing Overview</a></li>
+        </ol>
+      </div>
+
+      <div class="field-row">
+        <label>OpenAI API Key</label>
+        <input type="password" id="openai-key" placeholder="sk-proj-…" oninput="clearStatus('openai-status')">
+        <div class="field-hint">Your key is stored only in .env on this server — never transmitted or logged.</div>
+      </div>
+
+      <div id="openai-status"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+        <button class="btn btn-primary" onclick="validateOpenAI()">Validate Key</button>
+        <button class="btn btn-secondary" onclick="nextStep()">Skip →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: GitHub -->
+  <div class="step-pane" id="step-2">
+    <div class="card">
+      <h2>🐙 GitHub Token <span class="badge optional">Recommended</span></h2>
+      <p class="desc">Enables GitHub API access and GitHub Copilot as fallback AI engine.</p>
+
+      <a class="open-btn" href="https://github.com/settings/tokens/new?description=claude-prompt-engine&scopes=repo,read:user,read:org" target="_blank" rel="noopener">
+        🔗 Open github.com/settings/tokens/new
+      </a>
+
+      <div class="instructions">
+        <ol>
+          <li>Sign in to <strong>github.com</strong></li>
+          <li>The link pre-fills name + scopes — click <strong>Generate token</strong></li>
+          <li>Required scopes: <strong>repo</strong>, <strong>read:user</strong>, <strong>read:org</strong></li>
+          <li>For GitHub Copilot: also enable <strong>copilot</strong> scope</li>
+          <li>Copy the token (starts with <code>ghp_</code>)</li>
+        </ol>
+      </div>
+
+      <div class="field-row">
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="gh-token" placeholder="ghp_…" oninput="clearStatus('gh-status')">
+      </div>
+
+      <div id="gh-status"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+        <button class="btn btn-primary" onclick="validateGitHub()">Validate Token</button>
+        <button class="btn btn-secondary" onclick="nextStep()">Skip →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Telnyx -->
+  <div class="step-pane" id="step-3">
+    <div class="card">
+      <h2>📞 Telnyx API Key <span class="badge optional">Optional</span></h2>
+      <p class="desc">Required only for VoIP/SIP telephony, Vicidial dialplan generation, and call routing.</p>
+
+      <a class="open-btn" href="https://portal.telnyx.com/#/app/api-keys" target="_blank" rel="noopener">
+        🔗 Open portal.telnyx.com
+      </a>
+
+      <div class="instructions">
+        <ol>
+          <li>Sign in at <strong>portal.telnyx.com</strong></li>
+          <li>Go to <strong>Auth → API Keys</strong></li>
+          <li>Click <strong>Create API Key</strong></li>
+          <li>Copy the key (starts with <code>KEY_</code>)</li>
+        </ol>
+      </div>
+
+      <div class="field-row">
+        <label>Telnyx API Key (optional)</label>
+        <input type="password" id="telnyx-key" placeholder="KEY_…">
+      </div>
+
+      <div id="telnyx-status"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+        <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Database -->
+  <div class="step-pane" id="step-4">
+    <div class="card">
+      <h2>🗄️ MySQL / Vicidial Database <span class="badge optional">Optional</span></h2>
+      <p class="desc">Connection settings for your Vicidial MySQL database. Leave blank to use SQLite-only mode.</p>
+
+      <div class="field-row">
+        <label>MySQL Host</label>
+        <input type="text" id="mysql-host" placeholder="localhost" value="localhost">
+      </div>
+      <div class="field-row">
+        <label>MySQL User</label>
+        <input type="text" id="mysql-user" placeholder="root" value="root">
+      </div>
+      <div class="field-row">
+        <label>MySQL Password</label>
+        <input type="password" id="mysql-pass" placeholder="(leave blank for none)">
+      </div>
+      <div class="field-row">
+        <label>MySQL Database Name</label>
+        <input type="text" id="mysql-db" placeholder="vicidial" value="vicidial">
+      </div>
+      <div class="field-row">
+        <label>Server Port</label>
+        <input type="text" id="app-port" placeholder="3000" value="3000">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+        <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Save & Launch -->
+  <div class="step-pane" id="step-5">
+    <div class="card">
+      <h2>✅ Save Configuration & Launch</h2>
+      <p class="desc">Review your settings below, then save and start iAI.</p>
+
+      <div class="engine-status" id="engine-status">
+        <div class="engine-card" id="ec-openai">
+          <div class="engine-icon">🤖</div>
+          <div class="engine-name">OpenAI API</div>
+          <div class="engine-badge" id="ec-openai-badge">—</div>
+        </div>
+        <div class="engine-card" id="ec-copilot">
+          <div class="engine-icon">🐙</div>
+          <div class="engine-name">GitHub Copilot</div>
+          <div class="engine-badge" id="ec-copilot-badge">—</div>
+        </div>
+        <div class="engine-card" id="ec-cli">
+          <div class="engine-icon">💻</div>
+          <div class="engine-name">gh CLI</div>
+          <div class="engine-badge" id="ec-cli-badge">—</div>
+        </div>
+      </div>
+
+      <div class="final-grid" id="final-grid">
+        <div class="final-item">
+          <h4>🤖 OpenAI</h4>
+          <p id="final-openai">Not configured</p>
+        </div>
+        <div class="final-item">
+          <h4>🐙 GitHub</h4>
+          <p id="final-gh">Not configured</p>
+        </div>
+        <div class="final-item">
+          <h4>📞 Telnyx</h4>
+          <p id="final-telnyx">Not configured</p>
+        </div>
+        <div class="final-item">
+          <h4>🗄️ Database</h4>
+          <p id="final-db">localhost/vicidial</p>
+        </div>
+      </div>
+
+      <div id="save-status" style="margin:16px 0"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+        <button class="btn btn-green" onclick="saveAndLaunch()" id="save-btn">💾 Save & Launch iAI</button>
+      </div>
+    </div>
+
+    <div class="card" id="post-save-card" style="display:none">
+      <h2>🚀 iAI is Ready!</h2>
+      <p class="desc">Your configuration has been saved. Open iAI to start chatting.</p>
+      <div class="btn-row" style="flex-wrap:wrap">
+        <a href="/iai.html" class="btn btn-primary">🤖 Open iAI Chat</a>
+        <a href="/settings.html" class="btn btn-secondary">⚙️ Settings</a>
+        <a href="/data-import.html" class="btn btn-secondary">📊 Data Import</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Claude Prompt Engine v1.2.0 — iAI Setup Wizard</footer>
+
+<script>
+let currentStep = 0;
+const TOTAL_STEPS = 6;
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function gotoStep(n) {
+  document.querySelectorAll('.step-pane').forEach((p, i) => p.classList.toggle('active', i === n));
+  document.querySelectorAll('.step-pip').forEach((p, i) => {
+    p.classList.toggle('active', i === n);
+    p.classList.toggle('done', i < n);
+  });
+  document.querySelectorAll('.step-line').forEach((l, i) => l.classList.toggle('done', i < n));
+  currentStep = n;
+  if (n === 5) buildSummary();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function nextStep() { if (currentStep < TOTAL_STEPS - 1) gotoStep(currentStep + 1); }
+function prevStep() { if (currentStep > 0) gotoStep(currentStep - 1); }
+
+// ── Status helpers ────────────────────────────────────────────────────────────
+function showStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const icons = { ok: '✅', warn: '⚠️', error: '❌', info: 'ℹ️' };
+  el.innerHTML = `<div class="status-row ${type}">${icons[type] || ''} ${msg}</div>`;
+}
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = '';
+}
+
+// ── Check dependencies on load ────────────────────────────────────────────────
+async function checkDeps() {
+  try {
+    const res = await fetch('/api/iai/status');
+    const data = await res.json();
+
+    setDep('node', true, 'Node.js running');
+    setDep('npm', true, 'packages installed');
+    setDep('git', data.cliAvailable, data.cliAvailable ? 'gh CLI found' : 'gh CLI not found (optional)');
+    setDep('openai', data.openaiAvailable,
+      data.openaiAvailable
+        ? data.openaiQuota ? 'API key valid + quota OK' : 'Key valid — add billing credit'
+        : 'Not configured');
+
+    // Load existing values
+    const cfg = await fetch('/api/setup/config').then(r => r.json()).catch(() => ({}));
+    if (cfg.OPENAI_API_KEY) document.getElementById('openai-key').value = '••••••••••••••••••••';
+    if (cfg.GH_TOKEN)       document.getElementById('gh-token').value   = '••••••••••••••••••••';
+    if (cfg.TELNYX_API_KEY) document.getElementById('telnyx-key').value = '••••••••••••••••••••';
+    if (cfg.MYSQL_HOST)     document.getElementById('mysql-host').value = cfg.MYSQL_HOST;
+    if (cfg.MYSQL_USER)     document.getElementById('mysql-user').value = cfg.MYSQL_USER;
+    if (cfg.MYSQL_DB)       document.getElementById('mysql-db').value   = cfg.MYSQL_DB;
+    if (cfg.PORT)           document.getElementById('app-port').value   = cfg.PORT;
+
+    updateEngineCards(data);
+  } catch(e) {
+    setDep('node', true, 'Server running');
+    setDep('npm', true, 'packages OK');
+    setDep('git', false, 'Could not check');
+    setDep('openai', false, 'Could not check');
+  }
+}
+
+function setDep(name, ok, msg) {
+  const el = document.getElementById(`dep-${name}-status`);
+  if (el) {
+    el.textContent = msg;
+    el.className = 'dep-status ' + (ok ? 'found' : 'missing');
+  }
+}
+
+function updateEngineCards(data) {
+  const setCard = (id, badgeId, active, label, color) => {
+    document.getElementById(badgeId).textContent = label;
+    document.getElementById(badgeId).style.color = color;
+    if (active) document.getElementById(id).classList.add('active');
+  };
+  setCard('ec-openai',  'ec-openai-badge',
+    data.openaiAvailable && data.openaiQuota,
+    data.openaiAvailable ? (data.openaiQuota ? 'Active ✓' : 'Key OK — No quota') : 'Not set',
+    data.openaiAvailable && data.openaiQuota ? 'var(--green)' : 'var(--yellow)');
+  setCard('ec-copilot', 'ec-copilot-badge',
+    data.copilotAvailable,
+    data.copilotAvailable ? 'Available ✓' : 'Not available',
+    data.copilotAvailable ? 'var(--green)' : 'var(--muted)');
+  setCard('ec-cli',     'ec-cli-badge',
+    data.cliAvailable,
+    data.cliAvailable ? 'Available ✓' : 'Not installed',
+    data.cliAvailable ? 'var(--green)' : 'var(--muted)');
+}
+
+// ── Validation ────────────────────────────────────────────────────────────────
+async function validateOpenAI() {
+  const key = document.getElementById('openai-key').value.trim();
+  if (!key || key.startsWith('•')) { showStatus('openai-status', 'warn', 'Enter a key to validate.'); return; }
+  showStatus('openai-status', 'info', '<span class="spin">⟳</span> Validating…');
+  try {
+    const res = await fetch('/api/setup/validate-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'openai', key })
+    });
+    const data = await res.json();
+    if (data.valid && data.quota) {
+      showStatus('openai-status', 'ok', 'Key valid! Chat completions working.');
+      document.getElementById('openai-key').className = 'valid';
+      nextStep();
+    } else if (data.valid) {
+      showStatus('openai-status', 'warn',
+        'Key is valid but billing quota is exceeded. <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" style="color:inherit">Add billing credit →</a>');
+      document.getElementById('openai-key').className = 'invalid';
+    } else {
+      showStatus('openai-status', 'error', 'Invalid key: ' + (data.error || 'Unknown error'));
+      document.getElementById('openai-key').className = 'invalid';
+    }
+  } catch(e) {
+    showStatus('openai-status', 'error', 'Validation failed: ' + e.message);
+  }
+}
+
+async function validateGitHub() {
+  const token = document.getElementById('gh-token').value.trim();
+  if (!token || token.startsWith('•')) { showStatus('gh-status', 'warn', 'Enter a token to validate.'); return; }
+  showStatus('gh-status', 'info', '<span class="spin">⟳</span> Validating…');
+  try {
+    const res = await fetch('/api/setup/validate-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'github', key: token })
+    });
+    const data = await res.json();
+    if (data.valid) {
+      showStatus('gh-status', 'ok', `Authenticated as: ${data.username}`);
+      document.getElementById('gh-token').className = 'valid';
+      nextStep();
+    } else {
+      showStatus('gh-status', 'error', 'Invalid token: ' + (data.error || 'Unknown error'));
+    }
+  } catch(e) {
+    showStatus('gh-status', 'error', 'Validation failed: ' + e.message);
+  }
+}
+
+// ── Summary ────────────────────────────────────────────────────────────────────
+function buildSummary() {
+  const openaiKey = document.getElementById('openai-key').value;
+  const ghToken   = document.getElementById('gh-token').value;
+  const telnyx    = document.getElementById('telnyx-key').value;
+  const host      = document.getElementById('mysql-host').value;
+  const db        = document.getElementById('mysql-db').value;
+
+  document.getElementById('final-openai').textContent = openaiKey && !openaiKey.startsWith('•')
+    ? openaiKey.substring(0, 12) + '…' : openaiKey ? 'Existing key' : 'Not configured';
+  document.getElementById('final-gh').textContent = ghToken && !ghToken.startsWith('•')
+    ? ghToken.substring(0, 12) + '…' : ghToken ? 'Existing token' : 'Not configured';
+  document.getElementById('final-telnyx').textContent = telnyx && !telnyx.startsWith('•')
+    ? telnyx.substring(0, 10) + '…' : telnyx ? 'Existing key' : 'Not configured';
+  document.getElementById('final-db').textContent = host + '/' + db;
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveAndLaunch() {
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⟳</span> Saving…';
+
+  const gather = id => {
+    const val = document.getElementById(id).value;
+    return (val && !val.startsWith('•')) ? val : null;
+  };
+
+  const payload = {
+    OPENAI_API_KEY: gather('openai-key'),
+    GH_TOKEN:       gather('gh-token'),
+    TELNYX_API_KEY: gather('telnyx-key'),
+    MYSQL_HOST:     document.getElementById('mysql-host').value,
+    MYSQL_USER:     document.getElementById('mysql-user').value,
+    MYSQL_PASS:     gather('mysql-pass'),
+    MYSQL_DB:       document.getElementById('mysql-db').value,
+    PORT:           document.getElementById('app-port').value,
+  };
+  // Remove nulls
+  Object.keys(payload).forEach(k => payload[k] === null && delete payload[k]);
+
+  try {
+    const res = await fetch('/api/setup/save-env', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showStatus('save-status', 'ok', '.env saved successfully! Keys are loaded.');
+      document.getElementById('post-save-card').style.display = 'block';
+      btn.innerHTML = '✅ Saved!';
+      // Refresh engine status
+      fetch('/api/iai/status').then(r => r.json()).then(updateEngineCards).catch(() => {});
+    } else {
+      showStatus('save-status', 'error', 'Save failed: ' + (data.error || 'Unknown'));
+      btn.disabled = false;
+      btn.innerHTML = '💾 Save & Launch iAI';
+    }
+  } catch(e) {
+    showStatus('save-status', 'error', 'Request failed: ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '💾 Save & Launch iAI';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+checkDeps();
+</script>
+</body>
+</html>

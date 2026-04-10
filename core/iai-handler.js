@@ -1,8 +1,9 @@
 /**
  * iAI Handler — Claude Prompt Engine
- * Routes AI chat requests through:
- *   1. GitHub Copilot API  (api.githubcopilot.com — requires GH_TOKEN with Copilot Requests scope)
- *   2. GitHub CLI fallback (gh copilot suggest — uses local gh auth)
+ * Routes AI chat requests through engines in priority order:
+ *   1. OpenAI API          (api.openai.com — requires OPENAI_API_KEY with billing)
+ *   2. GitHub Copilot API  (api.githubcopilot.com — requires Copilot OAuth token)
+ *   3. GitHub CLI fallback (gh copilot suggest — uses local gh auth)
  *
  * Integrates with:
  *   - IAIMemory  : episodic + semantic + procedural memory
@@ -38,6 +39,50 @@ You help users with:
 - Vicidial lead list management and dialplan configuration
 Be specific with SQL syntax and Vicidial field names.`
 };
+
+// ─── OpenAI API ──────────────────────────────────────────────────────────────
+
+async function callOpenAIAPI(messages, model, apiKey) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      model: model || 'gpt-4o-mini',
+      messages,
+      max_tokens: 2048,
+      temperature: 0.7
+    });
+
+    const options = {
+      hostname: 'api.openai.com',
+      path:     '/v1/chat/completions',
+      method:   'POST',
+      headers: {
+        'Authorization':  `Bearer ${apiKey}`,
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      }
+    };
+
+    const req = https.request(options, res => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode === 200) {
+            resolve(parsed.choices?.[0]?.message?.content || '');
+          } else {
+            const msg = parsed?.error?.message || data.slice(0, 200);
+            reject(new Error(`OpenAI ${res.statusCode}: ${msg}`));
+          }
+        } catch(e) { reject(new Error('Invalid OpenAI API response')); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(45000, () => { req.destroy(); reject(new Error('OpenAI request timed out')); });
+    req.write(body);
+    req.end();
+  });
+}
 
 // ─── GitHub Copilot API ──────────────────────────────────────────────────────
 
@@ -158,24 +203,51 @@ class IAIHandler {
   // ── Core AI call ─────────────────────────────────────────────────────────
 
   async _callAI(fullMessages, model) {
-    const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
-    if (token) {
+    const errors = [];
+
+    // 1. OpenAI API (primary — most reliable with valid billing)
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (openaiKey) {
       try {
-        const text = await callCopilotAPI(fullMessages, model, token);
-        this.lastEngine = 'copilot-api';
-        return { text, engine: 'GitHub Copilot API', model: model || 'gpt-4o' };
+        const openaiModel = model && !model.startsWith('gh-') ? model : 'gpt-4o-mini';
+        const text = await callOpenAIAPI(fullMessages, openaiModel, openaiKey);
+        this.lastEngine = 'openai-api';
+        return { text, engine: 'OpenAI API', model: openaiModel };
       } catch(e) {
+        errors.push(`OpenAI: ${e.message}`);
+        console.warn('[iAI] OpenAI API failed:', e.message);
+      }
+    }
+
+    // 2. GitHub Copilot API (OAuth token required, not PAT)
+    const ghToken = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+    if (ghToken) {
+      try {
+        const copilotModel = model && !model.startsWith('gh-') ? model : 'gpt-4o';
+        const text = await callCopilotAPI(fullMessages, copilotModel, ghToken);
+        this.lastEngine = 'copilot-api';
+        return { text, engine: 'GitHub Copilot API', model: copilotModel };
+      } catch(e) {
+        errors.push(`Copilot API: ${e.message}`);
         console.warn('[iAI] Copilot API failed, falling back to CLI:', e.message);
       }
     }
+
+    // 3. GitHub CLI fallback
     try {
       const text = await callCLIFallback(fullMessages, 'general');
       this.lastEngine = 'gh-cli';
       return { text, engine: 'GitHub Copilot CLI', model: 'gh-copilot' };
     } catch(e) {
-      throw new Error('iAI unavailable: ' + e.message +
-        '\n\nTo enable iAI, set GH_TOKEN in your environment with Copilot Requests permission.');
+      errors.push(`CLI: ${e.message}`);
     }
+
+    throw new Error(
+      'iAI is offline. Configure at least one AI engine:\n' +
+      '• OpenAI: add OPENAI_API_KEY with billing in .env\n' +
+      '• GitHub Copilot: set GH_TOKEN with Copilot OAuth scope\n' +
+      `Errors: ${errors.join(' | ')}`
+    );
   }
 
   /**
@@ -273,42 +345,88 @@ class IAIHandler {
    * Check which engines are available.
    */
   async status() {
-    const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
-    let apiAvailable  = false;
-    let cliAvailable  = false;
+    const openaiKey = process.env.OPENAI_API_KEY;
+    const ghToken   = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 
-    if (token) {
+    let openaiAvailable  = false;
+    let openaiQuota      = false;
+    let copilotAvailable = false;
+    let cliAvailable     = false;
+
+    // Test OpenAI
+    if (openaiKey) {
+      try {
+        // Models endpoint is free — checks key validity
+        await new Promise((resolve, reject) => {
+          const req = https.request({
+            hostname: 'api.openai.com', path: '/v1/models',
+            headers: { 'Authorization': `Bearer ${openaiKey}` }
+          }, res => {
+            let d = ''; res.on('data', c => d += c);
+            res.on('end', () => res.statusCode === 200 ? resolve() : reject(new Error(res.statusCode)));
+          });
+          req.on('error', reject);
+          req.setTimeout(5000, () => { req.destroy(); reject(new Error('timeout')); });
+          req.end();
+        });
+        openaiAvailable = true;
+        // Quick chat ping to confirm quota
+        try {
+          await callOpenAIAPI(
+            [{ role: 'user', content: 'reply with: ok' }],
+            'gpt-4o-mini', openaiKey
+          );
+          openaiQuota = true;
+        } catch(e) {
+          openaiQuota = !e.message.includes('quota') && !e.message.includes('billing');
+        }
+      } catch(e) { /* not available */ }
+    }
+
+    // Test Copilot API
+    if (ghToken) {
       try {
         await callCopilotAPI(
-          [{ role: 'system', content: 'ping' }, { role: 'user', content: 'reply with: ok' }],
-          'gpt-4o', token
+          [{ role: 'user', content: 'reply with: ok' }],
+          'gpt-4o', ghToken
         );
-        apiAvailable = true;
-      } catch(e) {
-        // not available
-      }
+        copilotAvailable = true;
+      } catch(e) { /* not available */ }
     }
 
+    // Test gh CLI
     try {
-      await execPromise('gh copilot --version 2>/dev/null', { timeout: 5000 });
+      await execPromise('gh --version 2>/dev/null', { timeout: 5000 });
       cliAvailable = true;
-    } catch(e) {
-      // not available
-    }
+    } catch(e) { /* not available */ }
 
     const memoryReady = !!this.memory;
     const toolsReady  = !!this.tools;
 
+    let activeEngine = 'none';
+    let models = [];
+    if (openaiAvailable && openaiQuota) {
+      activeEngine = 'OpenAI API';
+      models = ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+    } else if (copilotAvailable) {
+      activeEngine = 'GitHub Copilot API';
+      models = ['gpt-4o', 'gpt-4o-mini', 'claude-3.5-sonnet', 'o1-mini'];
+    } else if (cliAvailable) {
+      activeEngine = 'GitHub Copilot CLI';
+      models = ['gh-copilot'];
+    }
+
     return {
-      apiAvailable,
+      openaiAvailable,
+      openaiQuota,
+      copilotAvailable,
       cliAvailable,
-      tokenSet:    !!token,
+      tokenSet:    !!ghToken,
+      openaiKeySet: !!openaiKey,
       memoryReady,
       toolsReady,
-      activeEngine: apiAvailable ? 'GitHub Copilot API' : cliAvailable ? 'GitHub Copilot CLI' : 'none',
-      models: apiAvailable
-        ? ['gpt-4o', 'gpt-4o-mini', 'claude-3.5-sonnet', 'o1-mini']
-        : ['gh-copilot']
+      activeEngine,
+      models
     };
   }
 }
